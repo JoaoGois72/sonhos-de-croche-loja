@@ -1,0 +1,40 @@
+{% extends "base.html" %}{% block content %}
+<style>
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  .card{background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:16px;box-shadow:0 10px 24px rgba(0,0,0,.06);padding:16px}
+  label{font-size:12px;color:#6b6b6b;text-transform:uppercase}
+  input,textarea,select{width:100%;padding:10px;border-radius:12px;border:1px solid rgba(0,0,0,.12);margin:6px 0 12px}
+  .btn{border:none;border-radius:999px;background:#ffcc33;padding:12px 14px;font-weight:900;cursor:pointer;width:100%}
+  .muted{color:#6b6b6b;font-size:12px}
+  @media (max-width:900px){.grid{grid-template-columns:1fr}}
+</style>
+
+<h2>Finalizar pedido</h2>
+<div class="grid">
+  <div class="card">
+    <h3>Seus itens</h3>
+    <div class="muted">
+      {% for it in items %}• {{ it.qty }}x {{ it.product.name }} — {{ money_br(it.subtotal) }}<br>{% endfor %}
+    </div>
+    <hr style="border:none;border-top:1px solid rgba(0,0,0,.08);margin:12px 0;">
+    <div><b>Total:</b> {{ money_br(total) }}</div>
+    {% if total_pix != total %}<div><b>Total no Pix:</b> {{ money_br(total_pix) }} <span class="muted">(desconto)</span></div>{% endif %}
+  </div>
+
+  <div class="card">
+    <h3>Dados para entrega</h3>
+    <form action="{{ url_for('create_order') }}" method="post">
+      <label>Nome</label><input name="customer_name" required placeholder="Seu nome completo">
+      <label>WhatsApp</label><input name="whatsapp" required placeholder="(xx) 9xxxx-xxxx">
+      <label>Cidade/UF</label><input name="city_state" placeholder="Aracaju/SE">
+      <label>Endereço</label><textarea name="address" rows="3" placeholder="Rua, número, bairro, complemento"></textarea>
+      <label>Observações</label><textarea name="notes" rows="2" placeholder="Cores desejadas, alça, prazo..."></textarea>
+      <label>Pagamento</label>
+      <select name="payment_method"><option value="pix">Pix</option><option value="card">Cartão</option></select>
+      <button class="btn" type="submit">Criar pedido</button>
+      <div class="muted" style="margin-top:10px">Pix: {{ pix_receiver }} • {{ pix_key }}</div>
+      {% if mp_link %}<div class="muted">Link cartão: {{ mp_link }}</div>{% endif %}
+    </form>
+  </div>
+</div>
+{% endblock %}

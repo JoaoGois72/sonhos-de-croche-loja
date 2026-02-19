@@ -1,0 +1,39 @@
+{% extends "base.html" %}{% block content %}
+<style>
+  .row{display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+  .btn2{border:1px solid rgba(0,0,0,.12);background:#fff;border-radius:999px;padding:12px 14px;font-weight:900;cursor:pointer}
+  .card{background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:16px;box-shadow:0 10px 24px rgba(0,0,0,.06);padding:16px;margin-top:14px}
+  table{width:100%;border-collapse:collapse}
+  th,td{padding:10px;border-bottom:1px solid rgba(0,0,0,.06);text-align:left}
+  th{font-size:12px;color:#6b6b6b;text-transform:uppercase}
+</style>
+<div class="row">
+  <div><h2>Painel</h2><div style="color:#6b6b6b">Pedidos recentes</div></div>
+  <div style="display:flex;gap:10px;flex-wrap:wrap"><a class="btn2" href="{{ url_for('admin_products') }}">Produtos</a></div>
+</div>
+<div class="card">
+  <h3>Pedidos</h3>
+  <table>
+    <thead><tr><th>#</th><th>Cliente</th><th>WhatsApp</th><th>Pagamento</th><th>Total</th><th>Status</th><th>Atualizar</th></tr></thead>
+    <tbody>
+      {% if orders|length == 0 %}<tr><td colspan="7">Sem pedidos ainda.</td></tr>
+      {% else %}
+        {% for o in orders %}
+        <tr>
+          <td>{{ o.id }}</td><td>{{ o.customer_name }}</td><td>{{ o.whatsapp }}</td>
+          <td>{{ 'Pix' if o.payment_method == 'pix' else 'Cartão' }}</td>
+          <td>R$ {{ "%.2f"|format(o.amount) }}</td>
+          <td>{{ o.status }}</td>
+          <td>
+            <form action="{{ url_for('admin_order_status', order_id=o.id) }}" method="post" style="display:flex;gap:8px;flex-wrap:wrap">
+              <input name="status" value="{{ o.status }}" style="padding:8px;border-radius:12px;border:1px solid rgba(0,0,0,.12)">
+              <button class="btn2" type="submit">Salvar</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      {% endif %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

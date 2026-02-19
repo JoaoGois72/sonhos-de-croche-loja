@@ -1,0 +1,58 @@
+{% extends "base.html" %}{% block content %}
+<style>
+  .hero{border-radius:16px;background:linear-gradient(135deg, rgba(255,138,0,.18), rgba(255,204,51,.22));border:1px solid rgba(0,0,0,.08);box-shadow:0 10px 30px rgba(0,0,0,.08);overflow:hidden}
+  .hero-inner{display:flex;gap:18px;align-items:center;padding:18px;flex-wrap:wrap}
+  .hero img{width:100%;max-height:220px;object-fit:cover;border-radius:14px}
+  .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:18px}
+  .card{background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:16px;overflow:hidden;box-shadow:0 10px 24px rgba(0,0,0,.06);transition:transform .12s ease, box-shadow .12s ease;}
+  .card:hover{transform:translateY(-2px);box-shadow:0 14px 30px rgba(0,0,0,.10)}
+  .thumb{height:180px;background:#fff3e0;overflow:hidden}
+  .thumb img{width:100%;height:100%;object-fit:cover}
+  .meta{padding:12px}
+  .meta b{display:block;font-size:14px;margin-bottom:6px}
+  .meta p{margin:0;color:#6b6b6b;font-size:12px;min-height:34px}
+  .row{display:flex;justify-content:space-between;align-items:center;margin-top:10px;gap:10px}
+  .price{font-weight:800}
+  .btn{border:none;border-radius:999px;background:#ffcc33;padding:10px 12px;font-weight:800;cursor:pointer;}
+  @media (max-width:1000px){.grid{grid-template-columns:repeat(3,1fr)}}
+  @media (max-width:720px){.grid{grid-template-columns:repeat(2,1fr)}}
+  @media (max-width:420px){.grid{grid-template-columns:1fr}}
+</style>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div style="flex:1;min-width:240px">
+      <h1 style="margin:0">Catálogo</h1>
+      <p style="margin:8px 0 0;color:#6b6b6b">Escolha sua bolsa favorita e finalize pelo Pix ou Cartão.</p>
+    </div>
+    <div style="flex:1;min-width:240px"><img src="{{ url_for('static', filename='brand/banner.jpg') }}" alt="Banner"></div>
+  </div>
+</div>
+
+<div class="grid">
+  {% for p in products %}
+    <div class="card">
+      <a href="{{ url_for('product_detail', product_id=p.id) }}">
+        <div class="thumb">
+          {% if p.images and p.images|length > 0 %}
+            <img src="{{ p.images[0].image_url }}" alt="{{ p.name }}">
+          {% else %}
+            <img src="{{ url_for('static', filename='brand/placeholder.jpg') }}" alt="{{ p.name }}">
+          {% endif %}
+        </div>
+      </a>
+      <div class="meta">
+        <b>{{ p.name }}</b>
+        <p>{{ p.description[:90] }}{% if p.description|length > 90 %}...{% endif %}</p>
+        <div class="row">
+          <div class="price">{{ money_br(p.price) }}</div>
+          <form action="{{ url_for('cart_add', product_id=p.id) }}" method="post">
+            <input type="hidden" name="qty" value="1">
+            <button class="btn" type="submit">Adicionar</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  {% endfor %}
+</div>
+{% endblock %}

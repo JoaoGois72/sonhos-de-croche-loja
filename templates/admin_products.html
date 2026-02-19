@@ -1,0 +1,33 @@
+{% extends "base.html" %}{% block content %}
+<style>
+  .row{display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+  .btn{border:none;border-radius:999px;background:#ffcc33;padding:12px 14px;font-weight:900;cursor:pointer}
+  .btn2{border:1px solid rgba(0,0,0,.12);background:#fff;border-radius:999px;padding:12px 14px;font-weight:900;cursor:pointer}
+  .card{background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:16px;box-shadow:0 10px 24px rgba(0,0,0,.06);padding:16px;margin-top:14px}
+  table{width:100%;border-collapse:collapse}
+  th,td{padding:10px;border-bottom:1px solid rgba(0,0,0,.06);text-align:left}
+  th{font-size:12px;color:#6b6b6b;text-transform:uppercase}
+</style>
+<div class="row">
+  <div><h2>Produtos</h2><div style="color:#6b6b6b">Gerencie produtos e fotos</div></div>
+  <div style="display:flex;gap:10px;flex-wrap:wrap"><a class="btn" href="{{ url_for('admin_products_new') }}">+ Novo produto</a><a class="btn2" href="{{ url_for('admin_dashboard') }}">Voltar</a></div>
+</div>
+<div class="card">
+  <table>
+    <thead><tr><th>ID</th><th>Nome</th><th>Preço</th><th>Ativo</th><th>Ações</th></tr></thead>
+    <tbody>
+      {% for p in products %}
+      <tr>
+        <td>{{ p.id }}</td><td>{{ p.name }}</td><td>{{ money_br(p.price) }}</td><td>{{ "Sim" if p.is_active else "Não" }}</td>
+        <td style="display:flex;gap:8px;flex-wrap:wrap">
+          <a class="btn2" href="{{ url_for('admin_products_edit', product_id=p.id) }}">Editar</a>
+          <form action="{{ url_for('admin_products_delete', product_id=p.id) }}" method="post" onsubmit="return confirm('Excluir este produto?');">
+            <button class="btn2" type="submit">Excluir</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

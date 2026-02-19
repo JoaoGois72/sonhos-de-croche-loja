@@ -1,0 +1,26 @@
+{% extends "base.html" %}{% block content %}
+<style>
+  .card{background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:16px;box-shadow:0 10px 24px rgba(0,0,0,.06);padding:16px}
+  textarea{width:100%;padding:12px;border-radius:12px;border:1px solid rgba(0,0,0,.12)}
+  .muted{color:#6b6b6b;font-size:12px}
+</style>
+
+<h2>Pedido criado ✅</h2>
+<div class="card">
+  <p><b>Pedido #{{ order.id }}</b> — {{ order.status }}</p>
+  <div class="muted">
+    {% for it in items %}• {{ it.qty }}x {{ it.product_name_snapshot }} — R$ {{ "%.2f"|format(it.unit_price) }}<br>{% endfor %}
+  </div>
+  <hr style="border:none;border-top:1px solid rgba(0,0,0,.08);margin:12px 0;">
+  <p><b>Total:</b> R$ {{ "%.2f"|format(order.amount) }}</p>
+
+  {% if order.payment_method == 'pix' %}
+    <p class="muted">Pix: {{ pix_receiver }} • {{ pix_key }}</p>
+  {% else %}
+    {% if mp_link %}<p class="muted">Pagamento no cartão: {{ mp_link }}</p>{% else %}<p class="muted">Pagamento no cartão: combine pelo WhatsApp.</p>{% endif %}
+  {% endif %}
+
+  <h3>Mensagem pronta para WhatsApp</h3>
+  <textarea rows="7" readonly>{{ whatsapp_message }}</textarea>
+</div>
+{% endblock %}

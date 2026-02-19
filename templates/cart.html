@@ -1,0 +1,47 @@
+{% extends "base.html" %}{% block content %}
+<style>
+  .card{background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:16px;box-shadow:0 10px 24px rgba(0,0,0,.06);overflow:hidden}
+  table{width:100%;border-collapse:collapse}
+  th,td{padding:12px;border-bottom:1px solid rgba(0,0,0,.06);text-align:left}
+  th{font-size:12px;color:#6b6b6b;text-transform:uppercase}
+  .row{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-top:12px;flex-wrap:wrap}
+  .btn{border:none;border-radius:999px;background:#ffcc33;padding:12px 14px;font-weight:900;cursor:pointer}
+  .btn2{border:1px solid rgba(0,0,0,.12);background:#fff;border-radius:999px;padding:12px 14px;font-weight:900;cursor:pointer}
+  .qty{width:70px;padding:10px;border-radius:12px;border:1px solid rgba(0,0,0,.12)}
+</style>
+
+<h2>Seu carrinho</h2>
+<div class="card">
+  <form action="{{ url_for('cart_update') }}" method="post">
+    <table>
+      <thead><tr><th>Produto</th><th>Qtd</th><th>Subtotal</th></tr></thead>
+      <tbody>
+        {% if items|length == 0 %}
+          <tr><td colspan="3">Seu carrinho está vazio.</td></tr>
+        {% else %}
+          {% for it in items %}
+          <tr>
+            <td><b>{{ it.product.name }}</b><br><span style="color:#6b6b6b;font-size:12px">{{ money_br(it.product.price) }}</span></td>
+            <td>
+              <input class="qty" type="number" min="0" max="99" name="qty_{{ it.product.id }}" value="{{ it.qty }}">
+              <div style="color:#6b6b6b;font-size:11px;margin-top:6px">0 remove</div>
+            </td>
+            <td><b>{{ money_br(it.subtotal) }}</b></td>
+          </tr>
+          {% endfor %}
+        {% endif %}
+      </tbody>
+    </table>
+    <div style="padding:14px">
+      <div class="row">
+        <div><b>Total:</b> {{ money_br(total) }}</div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn2" type="submit">Atualizar</button>
+          <a class="btn2" href="{{ url_for('cart_clear') }}">Limpar</a>
+          <a class="btn" href="{{ url_for('checkout') }}">Finalizar</a>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+{% endblock %}

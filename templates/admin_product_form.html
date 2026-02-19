@@ -1,0 +1,51 @@
+{% extends "base.html" %}{% block content %}
+<style>
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  .card{background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:16px;box-shadow:0 10px 24px rgba(0,0,0,.06);padding:16px}
+  label{font-size:12px;color:#6b6b6b;text-transform:uppercase}
+  input,textarea{width:100%;padding:10px;border-radius:12px;border:1px solid rgba(0,0,0,.12);margin:6px 0 12px}
+  .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .btn{border:none;border-radius:999px;background:#ffcc33;padding:12px 14px;font-weight:900;cursor:pointer}
+  .btn2{border:1px solid rgba(0,0,0,.12);background:#fff;border-radius:999px;padding:12px 14px;font-weight:900;cursor:pointer}
+  .thumbs{display:flex;gap:10px;flex-wrap:wrap}
+  .thumb{width:130px}
+  .thumb img{width:130px;height:100px;object-fit:cover;border-radius:14px;border:1px solid rgba(0,0,0,.10)}
+</style>
+<h2>{% if product %}Editar produto{% else %}Novo produto{% endif %}</h2>
+<div class="grid">
+  <div class="card">
+    <form method="post" enctype="multipart/form-data"
+      action="{% if product %}{{ url_for('admin_products_edit_post', product_id=product.id) }}{% else %}{{ url_for('admin_products_new_post') }}{% endif %}">
+      <label>Nome</label><input name="name" required value="{{ product.name if product else '' }}">
+      <label>Descrição</label><textarea name="description" rows="4">{{ product.description if product else '' }}</textarea>
+      <label>Preço (ex: 120,00)</label>
+      <input name="price" required value="{{ ('%.2f'|format(product.price)).replace('.', ',') if product else '' }}">
+      <div class="row"><label style="margin:0">Ativo</label><input type="checkbox" name="is_active" {% if not product or product.is_active %}checked{% endif %}></div>
+      <label>Fotos (pode selecionar várias)</label>
+      <input type="file" name="image_files" accept=".jpg,.jpeg,.png,.webp" multiple>
+      <div class="row" style="margin-top:8px">
+        <button class="btn" type="submit">Salvar</button>
+        <a class="btn2" href="{{ url_for('admin_products') }}">Voltar</a>
+      </div>
+    </form>
+  </div>
+
+  <div class="card">
+    <h3>Fotos atuais</h3>
+    {% if product and images and images|length > 0 %}
+      <div class="thumbs">
+        {% for img in images %}
+          <div class="thumb">
+            <img src="{{ img.image_url }}" alt="Foto">
+            <form action="{{ url_for('admin_product_image_delete', image_id=img.id) }}" method="post" onsubmit="return confirm('Remover esta foto?');">
+              <button class="btn2" style="width:130px;margin-top:8px" type="submit">Remover</button>
+            </form>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p style="color:#6b6b6b">Nenhuma foto ainda.</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
