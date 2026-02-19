@@ -1,18 +1,22 @@
-{% extends "base.html" %}{% block content %}
-<style>
-  .card{max-width:420px;margin:0 auto;background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:16px;box-shadow:0 10px 24px rgba(0,0,0,.06);padding:16px}
-  label{font-size:12px;color:#6b6b6b;text-transform:uppercase}
-  input{width:100%;padding:10px;border-radius:12px;border:1px solid rgba(0,0,0,.12);margin:6px 0 12px}
-  .btn{border:none;border-radius:999px;background:#ffcc33;padding:12px 14px;font-weight:900;cursor:pointer;width:100%}
-  .muted{color:#6b6b6b;font-size:12px}
-</style>
-<h2>Admin</h2>
-<div class="card">
-  <form action="{{ url_for('admin_login_post') }}" method="post">
-    <label>Email</label><input name="email" type="email" required placeholder="admin@...">
-    <label>Senha</label><input name="password" type="password" required placeholder="••••••••">
-    <button class="btn" type="submit">Entrar</button>
-    <p class="muted" style="margin-top:10px">Padrão: admin@sonhosdecroche.com / admin123</p>
-  </form>
+{% extends "base.html" %}
+{% block content %}
+<div class="card form-card">
+  <div class="card-pad">
+    <h2>Admin — Login</h2>
+    <p class="muted">Acesso restrito ao gerenciamento da loja.</p>
+    <form method="post" action="{{ url_for('admin_login_post') }}" style="margin-top:14px">
+      <div class="form-row">
+        <div>
+          <label class="muted">Email</label>
+          <input type="email" name="email" required>
+        </div>
+        <div>
+          <label class="muted">Senha</label>
+          <input type="password" name="password" required>
+        </div>
+      </div>
+      <button class="btn primary block" style="margin-top:14px">Entrar</button>
+    </form>
+  </div>
 </div>
 {% endblock %}

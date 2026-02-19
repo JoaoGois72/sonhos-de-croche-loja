@@ -1,47 +1,66 @@
-{% extends "base.html" %}{% block content %}
-<style>
-  .card{background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:16px;box-shadow:0 10px 24px rgba(0,0,0,.06);overflow:hidden}
-  table{width:100%;border-collapse:collapse}
-  th,td{padding:12px;border-bottom:1px solid rgba(0,0,0,.06);text-align:left}
-  th{font-size:12px;color:#6b6b6b;text-transform:uppercase}
-  .row{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-top:12px;flex-wrap:wrap}
-  .btn{border:none;border-radius:999px;background:#ffcc33;padding:12px 14px;font-weight:900;cursor:pointer}
-  .btn2{border:1px solid rgba(0,0,0,.12);background:#fff;border-radius:999px;padding:12px 14px;font-weight:900;cursor:pointer}
-  .qty{width:70px;padding:10px;border-radius:12px;border:1px solid rgba(0,0,0,.12)}
-</style>
-
+{% extends "base.html" %}
+{% block content %}
 <h2>Seu carrinho</h2>
-<div class="card">
-  <form action="{{ url_for('cart_update') }}" method="post">
-    <table>
-      <thead><tr><th>Produto</th><th>Qtd</th><th>Subtotal</th></tr></thead>
-      <tbody>
-        {% if items|length == 0 %}
-          <tr><td colspan="3">Seu carrinho está vazio.</td></tr>
-        {% else %}
-          {% for it in items %}
-          <tr>
-            <td><b>{{ it.product.name }}</b><br><span style="color:#6b6b6b;font-size:12px">{{ money_br(it.product.price) }}</span></td>
-            <td>
-              <input class="qty" type="number" min="0" max="99" name="qty_{{ it.product.id }}" value="{{ it.qty }}">
-              <div style="color:#6b6b6b;font-size:11px;margin-top:6px">0 remove</div>
-            </td>
-            <td><b>{{ money_br(it.subtotal) }}</b></td>
-          </tr>
-          {% endfor %}
-        {% endif %}
-      </tbody>
-    </table>
-    <div style="padding:14px">
-      <div class="row">
-        <div><b>Total:</b> {{ money_br(total) }}</div>
-        <div style="display:flex;gap:10px;flex-wrap:wrap">
-          <button class="btn2" type="submit">Atualizar</button>
-          <a class="btn2" href="{{ url_for('cart_clear') }}">Limpar</a>
-          <a class="btn" href="{{ url_for('checkout') }}">Finalizar</a>
-        </div>
+<p class="muted">Atualize as quantidades ou finalize sua compra.</p>
+
+{% if items and items|length > 0 %}
+<form method="post" action="{{ url_for('cart_update') }}">
+  <table class="table" style="margin-top:14px">
+    <thead>
+      <tr>
+        <th>Produto</th>
+        <th style="width:130px">Preço</th>
+        <th style="width:110px">Qtd.</th>
+        <th style="width:150px">Subtotal</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for it in items %}
+      <tr>
+        <td>
+          <strong>{{ it.product.name }}</strong>
+          <div class="muted" style="margin-top:3px">{{ (it.product.description[:70] ~ '…') if it.product.description and it.product.description|length>70 else (it.product.description or '') }}</div>
+        </td>
+        <td>R$ {{ "%.2f"|format(it.product.price) }}</td>
+        <td><input type="number" name="qty_{{ it.product.id }}" value="{{ it.qty }}" min="0" max="99"></td>
+        <td><strong>R$ {{ "%.2f"|format(it.subtotal) }}</strong></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <div class="grid" style="grid-template-columns:1fr 1fr;gap:16px;margin-top:16px;align-items:start">
+    <div class="card">
+      <div class="card-pad">
+        <strong>Atualizações</strong>
+        <p class="muted" style="margin-top:6px">Defina 0 para remover um item.</p>
+        <button class="btn primary block" style="margin-top:12px">Atualizar carrinho</button>
+        <a class="btn soft block" style="margin-top:10px" href="{{ url_for('cart_clear') }}">Esvaziar carrinho</a>
       </div>
     </div>
-  </form>
-</div>
+
+    <div class="card">
+      <div class="card-pad">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px">
+          <strong>Total</strong>
+          <strong class="price" style="margin:0">R$ {{ "%.2f"|format(total) }}</strong>
+        </div>
+
+        {% if pix_discount_percent() > 0 %}
+          {% set pix_total = price_with_pix_discount(total) %}
+          {% set eco_total = total - pix_total %}
+          <div class="pix" style="margin-top:12px">
+            <div class="line1">💰 {{ pix_discount_percent() }}% OFF no Pix</div>
+            <div class="line2">Economia: R$ {{ "%.2f"|format(eco_total) }} • Pix: R$ {{ "%.2f"|format(pix_total) }}</div>
+          </div>
+        {% endif %}
+
+        <a class="btn primary block" style="margin-top:12px" href="{{ url_for('checkout') }}">Finalizar compra</a>
+      </div>
+    </div>
+  </div>
+</form>
+{% else %}
+  <div class="card"><div class="card-pad">Seu carrinho está vazio. <a href="{{ url_for('index') }}"><strong>Voltar ao catálogo</strong></a></div></div>
+{% endif %}
 {% endblock %}

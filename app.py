@@ -5,19 +5,17 @@ from decimal import Decimal
 
 from flask import Flask, render_template, request, redirect, url_for, flash, session, abort
 from flask_sqlalchemy import SQLAlchemy
-from flask_login import (
-    LoginManager, UserMixin, login_user, logout_user, login_required, current_user
-)
+from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
-from dotenv import load_dotenv
-
-load_dotenv()
 
 db = SQLAlchemy()
 login_manager = LoginManager()
 
 
+# =========================
+# Models
+# =========================
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(255), unique=True, nullable=False)
@@ -30,8 +28,10 @@ class Product(db.Model):
     name = db.Column(db.String(120), nullable=False)
     description = db.Column(db.Text, default="")
     price = db.Column(db.Numeric(10, 2), nullable=False, default=0)
+    image_url = db.Column(db.Text, default="")  # legado (opcional)
     is_active = db.Column(db.Boolean, default=True)
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+
     images = db.relationship("ProductImage", backref="product", cascade="all, delete-orphan", lazy=True)
 
 
@@ -58,37 +58,52 @@ class Order(db.Model):
 
 class OrderItem(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    order_id = db.Column(db.Integer, db.ForeignKey("order.id"), nullable=False, index=True)
+    order_id = db.Column(db.Integer, db.ForeignKey("order.id"), nullable=False)
     product_id = db.Column(db.Integer, db.ForeignKey("product.id"), nullable=False)
     product_name_snapshot = db.Column(db.String(120), nullable=False)
     unit_price = db.Column(db.Numeric(10, 2), nullable=False, default=0)
     qty = db.Column(db.Integer, nullable=False, default=1)
 
 
+# =========================
+# App Factory
+# =========================
 def create_app():
     app = Flask(__name__)
-    app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "change-me-in-production")
+    app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "dev-secret")
+    app.config["WHATSAPP_NUMBER"] = "5579996897122"
+    app.config["INSTAGRAM_URL"] = "https://instagram.com/sonhosdecroche_byevanice"
 
-    db_url = os.getenv("DATABASE_URL")
+    # --- DATABASE URL (Railway provides DATABASE_URL; local falls back to sqlite) ---
+    db_url = os.getenv("DATABASE_URL", "").strip()
     if db_url:
+        # Railway/Heroku sometimes uses postgres://
         if db_url.startswith("postgres://"):
-            db_url = db_url.replace("postgres://", "postgresql+psycopg2://", 1)
-        elif db_url.startswith("postgresql://") and "postgresql+psycopg2://" not in db_url:
-            db_url = db_url.replace("postgresql://", "postgresql+psycopg2://", 1)
+            db_url = db_url.replace("postgres://", "postgresql+psycopg://", 1)
+        # If it's postgresql:// but without driver, force psycopg (psycopg3)
+        elif db_url.startswith("postgresql://") and "postgresql+psycopg://" not in db_url:
+            db_url = db_url.replace("postgresql://", "postgresql+psycopg://", 1)
     else:
-        db_url = "sqlite:///sonhos.db"
+        db_url = "sqlite:///" + os.path.join(app.root_path, "sonhos.db")
+
 
     app.config["SQLALCHEMY_DATABASE_URI"] = db_url
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
+    # --- STORE CONFIG ---
     app.config["STORE_NAME"] = os.getenv("STORE_NAME", "Sonhos de Crochê")
     app.config["PIX_KEY"] = os.getenv("PIX_KEY", "SUA_CHAVE_PIX_AQUI")
     app.config["PIX_RECEIVER_NAME"] = os.getenv("PIX_RECEIVER_NAME", "Sonhos de Crochê")
-    app.config["PIX_DISCOUNT_PERCENT"] = int(os.getenv("PIX_DISCOUNT_PERCENT", "0"))
+    app.config["PIX_DISCOUNT_PERCENT"] = int(os.getenv("PIX_DISCOUNT_PERCENT", "5"))  # default 5%
     app.config["MERCADOPAGO_PAYMENT_LINK"] = os.getenv("MERCADOPAGO_PAYMENT_LINK", "")
 
-    app.config["UPLOAD_FOLDER"] = os.path.join(app.root_path, "static", "img", "uploads")
-    app.config["MAX_CONTENT_LENGTH"] = 12 * 1024 * 1024
+    # Social
+    app.config["WHATSAPP_NUMBER"] = os.getenv("WHATSAPP_NUMBER", "")  # ex: 5579999999999
+    app.config["INSTAGRAM_URL"] = os.getenv("INSTAGRAM_URL", "")     # ex: https://instagram.com/...
+    # --- UPLOAD ---
+    app.config["UPLOAD_FOLDER"] = os.path.join(app.root_path, "static", "img")
+    app.config["MAX_CONTENT_LENGTH"] = 12 * 1024 * 1024  # 12MB
+
     ALLOWED_EXTENSIONS = {"jpg", "jpeg", "png", "webp"}
 
     def allowed_file(filename: str) -> bool:
@@ -100,8 +115,9 @@ def create_app():
         ext = (original.rsplit(".", 1)[1].lower() if "." in original else "jpg")
         unique = f"produto_{uuid.uuid4().hex[:12]}.{ext}"
         file_storage.save(os.path.join(app.config["UPLOAD_FOLDER"], unique))
-        return f"/static/img/uploads/{unique}"
+        return f"/static/img/{unique}"
 
+    # --- INIT EXTENSIONS ---
     db.init_app(app)
     login_manager.init_app(app)
     login_manager.login_view = "admin_login"
@@ -110,20 +126,34 @@ def create_app():
     def load_user(user_id: str):
         return User.query.get(int(user_id))
 
+    @login_manager.unauthorized_handler
+    def _unauth():
+        flash("Faça login para acessar o admin.", "warning")
+        return redirect(url_for("admin_login"))
+
+    # --- Helpers (Jinja) ---
     def cart():
-        return session.setdefault("cart", {})
+        return session.setdefault("cart", {})  # {product_id: qty}
 
     def cart_count():
         return sum(int(q) for q in cart().values())
 
-    def money_br(value: Decimal):
+    def money_br(value):
+        try:
+            value = Decimal(value)
+        except Exception:
+            value = Decimal("0.00")
         s = f"{value:.2f}"
         return "R$ " + s.replace(".", ",")
 
-    def price_with_pix_discount(price: Decimal):
-        pct = app.config.get("PIX_DISCOUNT_PERCENT", 0) or 0
+    def price_with_pix_discount(price):
+        pct = int(app.config.get("PIX_DISCOUNT_PERCENT", 0) or 0)
+        try:
+            price = Decimal(price)
+        except Exception:
+            price = Decimal("0.00")
         if pct <= 0:
-            return price
+            return price.quantize(Decimal("0.01"))
         factor = (Decimal(100) - Decimal(pct)) / Decimal(100)
         return (price * factor).quantize(Decimal("0.01"))
 
@@ -132,24 +162,29 @@ def create_app():
         cart_count=cart_count,
         money_br=money_br,
         pix_discount_percent=lambda: app.config.get("PIX_DISCOUNT_PERCENT", 0),
-        is_admin=lambda: current_user.is_authenticated,
+        price_with_pix_discount=price_with_pix_discount,
+        config=app.config,
     )
 
-    def bootstrap_db(seed: bool = True):
+    # --- DB init + seed (safe & idempotent) ---
+    def ensure_db_seed():
         db.create_all()
 
-        admin_email = os.getenv("ADMIN_EMAIL", "admin@sonhosdecroche.com")
-        admin_password = os.getenv("ADMIN_PASSWORD", "admin123")
+        # Create admin if missing
+        admin_email = os.getenv("ADMIN_EMAIL", "admin@sonhosdecroche.com").strip().lower()
+        admin_password = os.getenv("ADMIN_PASSWORD", "admin123").strip()
+
         if not User.query.filter_by(email=admin_email).first():
             u = User(
                 email=admin_email,
                 password_hash=generate_password_hash(admin_password),
-                created_at=datetime.utcnow()
+                created_at=datetime.utcnow(),
             )
             db.session.add(u)
             db.session.commit()
 
-        if seed and Product.query.count() == 0:
+        # Seed initial 20 products if none
+        if Product.query.count() == 0:
             names = [
                 "Bolsa Floral", "Bolsa Girassol", "Bolsa Verão", "Bolsa Boho", "Bolsa Elegance",
                 "Bolsa Pérola", "Bolsa Primavera", "Bolsa Mandala", "Bolsa Natural", "Bolsa Color Mix",
@@ -161,19 +196,28 @@ def create_app():
                     name=n,
                     description="Bolsa artesanal em crochê. Personalize cores e tamanho sob encomenda.",
                     price=Decimal("120.00"),
+                    image_url="",
                     is_active=True,
-                    created_at=datetime.utcnow()
+                    created_at=datetime.utcnow(),
                 ))
             db.session.commit()
 
     with app.app_context():
-        bootstrap_db(seed=True)
+        ensure_db_seed()
 
+    # =========================
+    # Routes - Loja
+    # =========================
     @app.route("/")
     def index():
         q = request.args.get("q", "").strip()
         if q:
-            products = Product.query.filter(Product.is_active == True, Product.name.ilike(f"%{q}%")).order_by(Product.created_at.desc()).all()
+            products = (
+                Product.query
+                .filter(Product.is_active.is_(True), Product.name.ilike(f"%{q}%"))
+                .order_by(Product.created_at.desc())
+                .all()
+            )
         else:
             products = Product.query.filter_by(is_active=True).order_by(Product.created_at.desc()).all()
         return render_template("index.html", products=products, q=q)
@@ -196,7 +240,7 @@ def create_app():
             if not product or not product.is_active:
                 continue
             qty_i = int(qty)
-            subtotal = (product.price * qty_i).quantize(Decimal("0.01"))
+            subtotal = (Decimal(product.price) * qty_i).quantize(Decimal("0.01"))
             total += subtotal
             items.append({"product": product, "qty": qty_i, "subtotal": subtotal})
         return render_template("cart.html", items=items, total=total)
@@ -250,7 +294,7 @@ def create_app():
             if not product or not product.is_active:
                 continue
             qty_i = int(qty)
-            subtotal = (product.price * qty_i).quantize(Decimal("0.01"))
+            subtotal = (Decimal(product.price) * qty_i).quantize(Decimal("0.01"))
             total += subtotal
             items.append({"product": product, "qty": qty_i, "subtotal": subtotal})
         if not items:
@@ -258,7 +302,6 @@ def create_app():
             return redirect(url_for("index"))
 
         total_pix = price_with_pix_discount(total)
-
         return render_template(
             "checkout.html",
             items=items,
@@ -297,9 +340,9 @@ def create_app():
             if not product or not product.is_active:
                 continue
             qty_i = int(qty)
-            subtotal = (product.price * qty_i).quantize(Decimal("0.01"))
+            subtotal = (Decimal(product.price) * qty_i).quantize(Decimal("0.01"))
             total += subtotal
-            items.append((product, qty_i, product.price))
+            items.append((product, qty_i, Decimal(product.price)))
 
         if not items:
             flash("Carrinho vazio.", "warning")
@@ -329,7 +372,7 @@ def create_app():
                 product_id=product.id,
                 product_name_snapshot=product.name,
                 unit_price=unit_price,
-                qty=qty_i
+                qty=qty_i,
             ))
 
         db.session.commit()
@@ -358,11 +401,16 @@ def create_app():
             pix_key=app.config["PIX_KEY"],
             pix_receiver=app.config["PIX_RECEIVER_NAME"],
             mp_link=app.config.get("MERCADOPAGO_PAYMENT_LINK", ""),
-            whatsapp_message=msg
+            whatsapp_message=msg,
         )
 
+    # =========================
+    # Routes - Admin
+    # =========================
     @app.get("/admin/login")
     def admin_login():
+        if current_user.is_authenticated:
+            return redirect(url_for("admin_dashboard"))
         return render_template("admin_login.html")
 
     @app.post("/admin/login")
@@ -374,6 +422,7 @@ def create_app():
             flash("Login inválido.", "danger")
             return redirect(url_for("admin_login"))
         login_user(user)
+        flash("Bem-vindo(a) ao admin ✅", "success")
         return redirect(url_for("admin_dashboard"))
 
     @app.get("/admin/logout")
@@ -398,18 +447,40 @@ def create_app():
     @app.get("/admin/produtos/novo")
     @login_required
     def admin_products_new():
-        return render_template("admin_product_form.html", product=None, images=[])
+        return render_template("admin_product_form.html", product=None)
 
     @app.post("/admin/produtos/novo")
     @login_required
     def admin_products_new_post():
         name = (request.form.get("name") or "").strip()
         description = (request.form.get("description") or "").strip()
-        price = (request.form.get("price") or "0").replace(",", ".").strip()
+        price_raw = (request.form.get("price") or "").strip()
+
+        # aceita:
+        # 120
+        # 120.00
+        # 120,00
+        # 1.200,50
+        price_raw = price_raw.replace(" ", "")
+
+        if "," in price_raw and "." in price_raw:
+            # formato brasileiro 1.200,50
+            price_raw = price_raw.replace(".", "").replace(",", ".")
+        elif "," in price_raw:
+            # formato 120,00
+            price_raw = price_raw.replace(",", ".")
+
+        try:
+            product.price = Decimal(price_raw).quantize(Decimal("0.01"))
+        except:
+            flash("Preço inválido.", "danger")
+            return redirect(url_for("admin_products_edit", product_id=product_id))
+
+        image_url = (request.form.get("image_url") or "").strip()
         is_active = True if request.form.get("is_active") == "on" else False
 
         try:
-            price_d = Decimal(price).quantize(Decimal("0.01"))
+            price_d = Decimal(price_raw).quantize(Decimal("0.01"))
         except Exception:
             flash("Preço inválido.", "danger")
             return redirect(url_for("admin_products_new"))
@@ -418,16 +489,17 @@ def create_app():
             flash("Informe o nome.", "danger")
             return redirect(url_for("admin_products_new"))
 
-        p = Product(name=name, description=description, price=price_d, is_active=is_active, created_at=datetime.utcnow())
+        p = Product(name=name, description=description, price=price_d, image_url=image_url, is_active=is_active)
         db.session.add(p)
         db.session.flush()
 
+        # Upload múltiplas fotos
         files = request.files.getlist("image_files")
         for f in files:
             if not f or not getattr(f, "filename", ""):
                 continue
             if not allowed_file(f.filename):
-                flash("Formato de foto inválido (use JPG/PNG/WEBP).", "warning")
+                flash("Alguma foto foi ignorada (extensão não permitida). Use JPG/PNG/WEBP.", "warning")
                 continue
             url = save_upload(f)
             db.session.add(ProductImage(product_id=p.id, image_url=url))
@@ -440,42 +512,59 @@ def create_app():
     @login_required
     def admin_products_edit(product_id):
         product = Product.query.get_or_404(product_id)
-        images = ProductImage.query.filter_by(product_id=product.id).order_by(ProductImage.created_at.asc()).all()
-        return render_template("admin_product_form.html", product=product, images=images)
+        return render_template("admin_product_form.html", product=product)
 
     @app.post("/admin/produtos/<int:product_id>/editar")
     @login_required
     def admin_products_edit_post(product_id):
         product = Product.query.get_or_404(product_id)
+
         product.name = (request.form.get("name") or "").strip()
         product.description = (request.form.get("description") or "").strip()
+        product.image_url = (request.form.get("image_url") or "").strip()
         product.is_active = True if request.form.get("is_active") == "on" else False
 
-        price = (request.form.get("price") or "0").replace(",", ".").strip()
+        # ===== CORREÇÃO DEFINITIVA DO PREÇO =====
+        price_raw = (request.form.get("price") or "").strip()
+
+        # Normaliza formatos brasileiros
+        price_raw = price_raw.replace(" ", "")
+
+        if "," in price_raw and "." in price_raw:
+            # 1.200,50
+            price_raw = price_raw.replace(".", "").replace(",", ".")
+        elif "," in price_raw:
+            # 120,00
+            price_raw = price_raw.replace(",", ".")
+
         try:
-            product.price = Decimal(price).quantize(Decimal("0.01"))
-        except Exception:
-            flash("Preço inválido.", "danger")
+            product.price = Decimal(price_raw).quantize(Decimal("0.01"))
+        except Exception as e:
+            flash(f"Preço inválido. ({e})", "danger")
             return redirect(url_for("admin_products_edit", product_id=product_id))
 
+        # ===== UPLOAD DE FOTOS =====
         files = request.files.getlist("image_files")
         for f in files:
             if not f or not getattr(f, "filename", ""):
                 continue
             if not allowed_file(f.filename):
-                flash("Formato de foto inválido (use JPG/PNG/WEBP).", "warning")
+                flash("Alguma foto foi ignorada (extensão não permitida).", "warning")
                 continue
             url = save_upload(f)
             db.session.add(ProductImage(product_id=product.id, image_url=url))
 
         db.session.commit()
-        flash("Produto atualizado ✅", "success")
+
+        flash("Produto atualizado com sucesso ✅", "success")
         return redirect(url_for("admin_products_edit", product_id=product.id))
+
 
     @app.post("/admin/produtos/imagem/<int:image_id>/excluir")
     @login_required
     def admin_product_image_delete(image_id):
         img = ProductImage.query.get_or_404(image_id)
+        # remove file from disk if local static file
         try:
             if img.image_url.startswith("/static/"):
                 rel = img.image_url.lstrip("/")
@@ -484,6 +573,7 @@ def create_app():
                     os.remove(fp)
         except Exception:
             pass
+
         product_id = img.product_id
         db.session.delete(img)
         db.session.commit()
@@ -510,15 +600,17 @@ def create_app():
             flash("Status atualizado ✅", "success")
         return redirect(url_for("admin_dashboard"))
 
+    # CLI (optional local)
     @app.cli.command("init-db")
     def init_db():
         with app.app_context():
-            bootstrap_db(seed=True)
-            print("✅ Banco inicializado com admin e catálogo.")
+            ensure_db_seed()
+            print("✅ Banco inicializado.")
 
     return app
 
 
+# For gunicorn: gunicorn app:create_app
 if __name__ == "__main__":
     app = create_app()
     app.run(host="0.0.0.0", port=int(os.getenv("PORT", "5000")), debug=True)

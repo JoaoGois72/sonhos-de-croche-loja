@@ -1,50 +1,62 @@
-{% extends "base.html" %}{% block content %}
-<style>
-  .pwrap{display:grid;grid-template-columns:1.2fr .8fr;gap:18px}
-  .panel{background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:16px;box-shadow:0 10px 24px rgba(0,0,0,.06);overflow:hidden}
-  .gallery{padding:12px}
-  .mainimg{height:360px;border-radius:14px;overflow:hidden;background:#fff3e0}
-  .mainimg img{width:100%;height:100%;object-fit:cover}
-  .thumbs{display:flex;gap:10px;overflow:auto;padding:10px 0 0}
-  .thumbs img{width:90px;height:70px;object-fit:cover;border-radius:12px;border:1px solid rgba(0,0,0,.08);cursor:pointer}
-  .info{padding:16px}
-  .price{font-size:22px;font-weight:900;margin:14px 0}
-  .btn{border:none;border-radius:999px;background:#ffcc33;padding:12px 14px;font-weight:900;cursor:pointer;width:100%}
-  .muted{color:#6b6b6b;font-size:12px}
-  @media (max-width:900px){.pwrap{grid-template-columns:1fr}.mainimg{height:280px}}
-</style>
-
-<div class="pwrap">
-  <div class="panel">
-    <div class="gallery">
-      <div class="mainimg">
-        {% if images and images|length > 0 %}
-          <img id="mainPhoto" src="{{ images[0].image_url }}" alt="{{ product.name }}">
-        {% else %}
-          <img id="mainPhoto" src="{{ url_for('static', filename='brand/placeholder.jpg') }}" alt="{{ product.name }}">
-        {% endif %}
-      </div>
-      {% if images and images|length > 1 %}
-      <div class="thumbs">
-        {% for img in images %}
-          <img src="{{ img.image_url }}" alt="Foto {{ loop.index }}" onclick="document.getElementById('mainPhoto').src=this.src">
-        {% endfor %}
-      </div>
+{% extends "base.html" %}
+{% block content %}
+<div class="grid" style="grid-template-columns:1.1fr .9fr;gap:16px;align-items:start">
+  <div class="card">
+    <div class="media" style="height:420px">
+      {% if images and images|length > 0 %}
+        <img src="{{ images[0].image_url }}" alt="{{ product.name }}">
+      {% else %}
+        <img src="{{ product.image_url or url_for('static', filename='img/placeholder.jpg') }}" alt="{{ product.name }}">
       {% endif %}
     </div>
+    {% if images and images|length > 1 %}
+    <div class="card-pad">
+      <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(92px,1fr));gap:10px">
+        {% for im in images %}
+          <a class="card" style="padding:0;box-shadow:none;border:1px solid rgba(0,0,0,.08);overflow:hidden" href="{{ im.image_url }}" target="_blank">
+            <img src="{{ im.image_url }}" style="width:100%;height:86px;object-fit:cover;display:block" alt="Foto {{ loop.index }}">
+          </a>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
   </div>
 
-  <div class="panel">
-    <div class="info">
-      <h2 style="margin:0 0 8px">{{ product.name }}</h2>
-      <p style="margin:0;color:#6b6b6b">{{ product.description }}</p>
-      <div class="price">{{ money_br(product.price) }}</div>
-      <form action="{{ url_for('cart_add', product_id=product.id) }}" method="post">
-        <label class="muted">Quantidade</label>
-        <input name="qty" type="number" value="1" min="1" max="99" style="width:100%;padding:10px;border-radius:12px;border:1px solid rgba(0,0,0,.12);margin:8px 0 12px;">
-        <button class="btn" type="submit">Adicionar ao carrinho</button>
+  <div class="card">
+    <div class="card-pad">
+      <h2 style="margin:0 0 6px">{{ product.name }}</h2>
+      <div class="muted">{{ product.description }}</div>
+
+      <div class="price">R$ {{ "%.2f"|format(product.price) }}</div>
+
+      {% if pix_discount_percent() > 0 %}
+        {% set pix_price = price_with_pix_discount(product.price) %}
+        {% set eco = (product.price - pix_price) %}
+        <div class="pix">
+          <div class="line1">💰 {{ pix_discount_percent() }}% OFF no Pix</div>
+          <div class="line2">Economia: R$ {{ "%.2f"|format(eco) }} • Pix: R$ {{ "%.2f"|format(pix_price) }}</div>
+        </div>
+      {% endif %}
+
+      <div class="kpis">
+        <span class="chip">✔ Feita à mão</span>
+        <span class="chip">✔ Personalizável</span>
+        <span class="chip">✔ Envio Brasil</span>
+      </div>
+
+      <form method="post" action="{{ url_for('cart_add', product_id=product.id) }}" style="margin-top:14px">
+        <div class="form-row">
+          <div>
+            <label class="muted">Quantidade</label>
+            <input type="number" name="qty" value="1" min="1" max="99">
+          </div>
+          <div style="display:flex;align-items:end">
+            <button class="btn primary block">🛍️ Adicionar ao carrinho</button>
+          </div>
+        </div>
       </form>
-      <div style="margin-top:12px"><a class="muted" href="{{ url_for('cart_view') }}">→ Ver carrinho</a></div>
+
+      <a class="btn soft block" style="margin-top:10px" href="{{ url_for('index') }}">← Voltar ao catálogo</a>
     </div>
   </div>
 </div>

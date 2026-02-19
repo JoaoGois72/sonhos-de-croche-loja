@@ -1,26 +1,37 @@
-{% extends "base.html" %}{% block content %}
-<style>
-  .card{background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:16px;box-shadow:0 10px 24px rgba(0,0,0,.06);padding:16px}
-  textarea{width:100%;padding:12px;border-radius:12px;border:1px solid rgba(0,0,0,.12)}
-  .muted{color:#6b6b6b;font-size:12px}
-</style>
-
-<h2>Pedido criado ✅</h2>
+{% extends "base.html" %}
+{% block content %}
 <div class="card">
-  <p><b>Pedido #{{ order.id }}</b> — {{ order.status }}</p>
-  <div class="muted">
-    {% for it in items %}• {{ it.qty }}x {{ it.product_name_snapshot }} — R$ {{ "%.2f"|format(it.unit_price) }}<br>{% endfor %}
+  <div class="card-pad">
+    <h2>Pedido confirmado ✅</h2>
+    <p class="muted" style="margin-top:6px">Pedido <strong>#{{ order.id }}</strong> • Total: <strong>R$ {{ "%.2f"|format(order.amount) }}</strong></p>
+
+    <div style="margin-top:14px">
+      <strong>Itens</strong>
+      <ul style="margin-top:8px;padding-left:18px">
+        {% for it in items %}
+          <li>{{ it.qty }}x {{ it.product_name_snapshot }} (R$ {{ "%.2f"|format(it.unit_price) }})</li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    {% if order.payment_method == "pix" %}
+      <div class="pix" style="margin-top:14px">
+        <div class="line1">Pagamento via Pix</div>
+        <div class="line2">Chave Pix: <strong>{{ pix_key }}</strong> • Recebedor: <strong>{{ pix_receiver }}</strong></div>
+      </div>
+    {% else %}
+      {% if mp_link %}
+        <div class="pix" style="margin-top:14px">
+          <div class="line1">Pagamento via Cartão</div>
+          <div class="line2"><a class="btn primary" target="_blank" href="{{ mp_link }}">Pagar com cartão</a></div>
+        </div>
+      {% endif %}
+    {% endif %}
+
+    <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap">
+      <a class="btn primary" target="_blank" href="https://wa.me/?text={{ whatsapp_message|urlencode }}">Enviar pedido no WhatsApp</a>
+      <a class="btn soft" href="{{ url_for('index') }}">Voltar ao catálogo</a>
+    </div>
   </div>
-  <hr style="border:none;border-top:1px solid rgba(0,0,0,.08);margin:12px 0;">
-  <p><b>Total:</b> R$ {{ "%.2f"|format(order.amount) }}</p>
-
-  {% if order.payment_method == 'pix' %}
-    <p class="muted">Pix: {{ pix_receiver }} • {{ pix_key }}</p>
-  {% else %}
-    {% if mp_link %}<p class="muted">Pagamento no cartão: {{ mp_link }}</p>{% else %}<p class="muted">Pagamento no cartão: combine pelo WhatsApp.</p>{% endif %}
-  {% endif %}
-
-  <h3>Mensagem pronta para WhatsApp</h3>
-  <textarea rows="7" readonly>{{ whatsapp_message }}</textarea>
 </div>
 {% endblock %}
