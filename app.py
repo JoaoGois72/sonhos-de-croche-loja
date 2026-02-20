@@ -452,7 +452,8 @@ def create_app():
 
     @app.post("/admin/produtos/novo")
     @login_required
-    def admin_products_new_post():
+    def admin_products_new_post(product_id):
+        product = Product.query.get_or_404(product_id)
         name = (request.form.get("name") or "").strip()
         description = (request.form.get("description") or "").strip()
         price_raw = (request.form.get("price") or "").strip()
