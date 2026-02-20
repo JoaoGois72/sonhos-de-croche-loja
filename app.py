@@ -75,17 +75,18 @@ def create_app():
     app.config["INSTAGRAM_URL"] = "https://instagram.com/sonhosdecroche_byevanice"
 
     # --- DATABASE URL (Railway provides DATABASE_URL; local falls back to sqlite) ---
+  # --- DATABASE URL ---
     db_url = os.getenv("DATABASE_URL", "").strip()
+
     if db_url:
-        # Railway/Heroku sometimes uses postgres://
         if db_url.startswith("postgres://"):
             db_url = db_url.replace("postgres://", "postgresql+psycopg://", 1)
-        # If it's postgresql:// but without driver, force psycopg (psycopg3)
-        elif db_url.startswith("postgresql://") and "postgresql+psycopg://" not in db_url:
+
+        if db_url.startswith("postgresql://") and "postgresql+psycopg://" not in db_url:
             db_url = db_url.replace("postgresql://", "postgresql+psycopg://", 1)
     else:
-        db_url = "sqlite:///" + os.path.join(app.root_path, "sonhos.db")
-
+        # fallback local
+        db_url = "sqlite:///sonhos.db"
 
     app.config["SQLALCHEMY_DATABASE_URI"] = db_url
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
