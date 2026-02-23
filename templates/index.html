@@ -1,20 +1,20 @@
 {% extends "base.html" %}
 {% block hero %}
-<div class="hero">
-<div class="hero-banner">
-    <img src="{{ url_for('static', filename='img/banner.jpg') }}" alt="Sonhos de Crochê">
-</div>
-
-  
-  <div class="hero-inner">
-    <h1>Sonhos de Crochê 🧶</h1>
-    <p>Bolsas artesanais premium com acabamento impecável. Escolha sua favorita e finalize com segurança.</p>
-    <div class="hero-cta">
-      <a class="btn primary" href="#catalogo">Ver catálogo</a>
-      <a class="btn ghost" href="{{ url_for('cart_view') }}">Ir para carrinho</a>
-    </div>
+<section class="hero-banner">
+  <img src="{{ url_for('static', filename='img/banner.jpg') }}" alt="Sonhos de Crochê">
+</section>
+<section class="about-crochet">
+  <div class="container">
+    <h2>Mais que bolsas, criamos arte em crochê</h2>
+    <p>
+      Além das nossas bolsas artesanais premium, também produzimos 
+      <strong>amigurumis, roupas em crochê, biquínis e peças exclusivas sob encomenda</strong>. 
+      Cada criação é feita à mão com carinho, qualidade e acabamento impecável.
+    </p>
   </div>
-</div>
+</section>
+ 
+  
 {% endblock %}
 
 {% block content %}
