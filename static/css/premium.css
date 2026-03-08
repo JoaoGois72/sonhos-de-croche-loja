@@ -692,3 +692,126 @@ object-fit:cover;
     height:54px;
   }
 }
+
+/* ================================= */
+/* MOBILE RESPONSIVE */
+/* ================================= */
+
+@media (max-width: 900px){
+
+/* HEADER */
+
+.header-wrap{
+flex-direction:column;
+align-items:flex-start;
+gap:10px;
+padding:10px 0;
+}
+
+.nav{
+width:100%;
+display:flex;
+gap:12px;
+flex-wrap:wrap;
+font-size:14px;
+}
+
+/* HERO */
+
+.hero-v3-grid{
+grid-template-columns:1fr;
+gap:25px;
+}
+
+.hero-v3-copy h1{
+font-size:34px;
+line-height:1.1;
+}
+
+.hero-v3-copy p{
+font-size:15px;
+}
+
+.hero-v3-media{
+height:260px;
+}
+
+/* BOTÕES HERO */
+
+.hero-v3-actions{
+flex-direction:column;
+}
+
+.hero-v3-actions .btn{
+width:100%;
+text-align:center;
+}
+
+/* CATEGORIAS */
+
+.categories-v3-grid{
+grid-template-columns:1fr 1fr;
+gap:15px;
+}
+
+/* PRODUTOS */
+
+.products-v3-grid{
+grid-template-columns:1fr 1fr;
+gap:15px;
+}
+
+.product-v3-body h3{
+font-size:16px;
+}
+
+/* INSTAGRAM */
+
+.instagram-v3-grid{
+grid-template-columns:1fr 1fr;
+}
+
+/* TESTEMUNHOS */
+
+.testimonials-v3-grid{
+grid-template-columns:1fr;
+}
+
+/* CTA FINAL */
+
+.cta-v3-box{
+padding:35px 20px;
+}
+
+.cta-v3-box h2{
+font-size:26px;
+}
+
+/* ADMIN TABLE */
+
+.admin-table{
+font-size:12px;
+}
+
+.admin-table th,
+.admin-table td{
+padding:8px;
+}
+
+/* BOTÕES ADMIN */
+
+.admin-actions{
+flex-direction:column;
+align-items:flex-start;
+gap:6px;
+}
+
+.status-select{
+width:100%;
+}
+
+.btn-update{
+width:100%;
+}
+
+}
