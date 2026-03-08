@@ -22,8 +22,30 @@ class User(db.Model, UserMixin):
     password_hash = db.Column(db.String(255), nullable=False)
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
-class CustomOrder(db.Model):
+class Product(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(200), nullable=False)
+    description = db.Column(db.Text, default="")
+    image = db.Column(db.String(300), default="")
+    is_active = db.Column(db.Boolean, default=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
+    images = db.relationship(
+        "ProductImage",
+        backref="product",
+        cascade="all, delete-orphan",
+        lazy=True
+    )
+
+
+class ProductImage(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    product_id = db.Column(db.Integer, db.ForeignKey("product.id"), nullable=False)
+    image = db.Column(db.String(300), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+
+class CustomOrder(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(120), nullable=False)
     whatsapp = db.Column(db.String(50), nullable=False)
@@ -31,24 +53,6 @@ class CustomOrder(db.Model):
     description = db.Column(db.Text)
     status = db.Column(db.String(50), default="Nova")
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-class Product(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(120), nullable=False)
-    description = db.Column(db.Text, default="")
-    price = db.Column(db.Numeric(10, 2), nullable=False, default=0)
-    image_url = db.Column(db.Text, default="")  # legado (opcional)
-    is_active = db.Column(db.Boolean, default=True)
-    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-
-    images = db.relationship("ProductImage", backref="product", cascade="all, delete-orphan", lazy=True)
-
-
-class ProductImage(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    product_id = db.Column(db.Integer, db.ForeignKey("product.id"), nullable=False, index=True)
-    image_url = db.Column(db.Text, nullable=False)
-    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-
 
 class Order(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -110,21 +114,30 @@ def create_app():
     app.config["WHATSAPP_NUMBER"] = os.getenv("WHATSAPP_NUMBER", "")  # ex: 5579999999999
     app.config["INSTAGRAM_URL"] = os.getenv("INSTAGRAM_URL", "")     # ex: https://instagram.com/...
     # --- UPLOAD ---
-    app.config["UPLOAD_FOLDER"] = os.path.join(app.root_path, "static", "img")
+    app.config["UPLOAD_FOLDER"] = os.path.join(app.root_path, "static", "img", "uploads")
     app.config["MAX_CONTENT_LENGTH"] = 12 * 1024 * 1024  # 12MB
 
     ALLOWED_EXTENSIONS = {"jpg", "jpeg", "png", "webp"}
+    os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
 
-    def allowed_file(filename: str) -> bool:
+    def allowed_file(filename):
         return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
-    def save_upload(file_storage) -> str:
-        os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
-        original = secure_filename(file_storage.filename or "")
-        ext = (original.rsplit(".", 1)[1].lower() if "." in original else "jpg")
-        unique = f"produto_{uuid.uuid4().hex[:12]}.{ext}"
-        file_storage.save(os.path.join(app.config["UPLOAD_FOLDER"], unique))
-        return f"/static/img/{unique}"
+
+    def save_image(file_storage):
+        if not file_storage or not file_storage.filename:
+            return ""
+
+        if not allowed_file(file_storage.filename):
+            return ""
+
+        original = secure_filename(file_storage.filename)
+        ext = original.rsplit(".", 1)[1].lower()
+        filename = f"{uuid.uuid4().hex}.{ext}"
+        path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+        file_storage.save(path)
+
+        return filename
 
     # --- INIT EXTENSIONS ---
     db.init_app(app)
@@ -204,8 +217,7 @@ def create_app():
                 db.session.add(Product(
                     name=n,
                     description="Bolsa artesanal em crochê. Personalize cores e tamanho sob encomenda.",
-                    price=Decimal("0.00"),
-                    image_url="",
+                    image="",
                     is_active=True,
                     created_at=datetime.utcnow(),
                 ))
@@ -230,14 +242,6 @@ def create_app():
         else:
             products = Product.query.filter_by(is_active=True).order_by(Product.created_at.desc()).all()
         return render_template("index.html", products=products, q=q)
-
-    @app.route("/produto/<int:product_id>")
-    def product_detail(product_id):
-        product = Product.query.get_or_404(product_id)
-        if not product.is_active:
-            abort(404)
-        images = ProductImage.query.filter_by(product_id=product.id).order_by(ProductImage.created_at.asc()).all()
-        return render_template("product.html", product=product, images=images)
 
     @app.route("/carrinho")
     def cart_view():
@@ -479,75 +483,94 @@ def create_app():
         products = Product.query.order_by(Product.created_at.desc()).all()
         return render_template("admin_products.html", products=products)
 
+    @app.route("/produto/<int:product_id>")
+    def product_detail(product_id):
+        product = Product.query.get_or_404(product_id)
+
+        if not product.is_active:
+            abort(404)
+
+        related_products = (
+            Product.query
+            .filter(Product.id != product.id, Product.is_active.is_(True))
+            .order_by(Product.created_at.desc())
+            .limit(4)
+            .all()
+        )
+
+        return render_template(
+            "product_detail.html",
+            product=product,
+            related_products=related_products
+        )
+
     @app.get("/admin/produtos/novo")
     @login_required
     def admin_products_new():
         return render_template("admin_product_form.html", product=None)
 
-    @app.post("/admin/produtos/novo")
+    @app.route("/admin/produtos/novo", methods=["GET", "POST"])
     @login_required
-    def admin_products_new_post(product_id):
-        product = Product.query.get_or_404(product_id)
-        name = (request.form.get("name") or "").strip()
-        description = (request.form.get("description") or "").strip()
-        #price_raw = (request.form.get("price") or "").strip()
+    def admin_product_new():
+        if request.method == "POST":
+            name = (request.form.get("name") or "").strip()
+            description = (request.form.get("description") or "").strip()
+            is_active = True if request.form.get("is_active") == "on" else False
 
-        # aceita:
-        # 120
-        # 120.00
-        # 120,00
-        # 1.200,50
-        #price_raw = price_raw.replace(" ", "")
+            if not name:
+                flash("Informe o nome do produto.", "danger")
+                return redirect(url_for("admin_product_new"))
 
-        #if "," in price_raw and "." in price_raw:
-            # formato brasileiro 1.200,50
-           # price_raw = price_raw.replace(".", "").replace(",", ".")
-       # elif "," in price_raw:
-            # formato 120,00
-           # price_raw = price_raw.replace(",", ".")
+            main_file = request.files.get("image")
+            main_image = save_image(main_file)
 
-        #try:
-            #product.price = Decimal(price_raw).quantize(Decimal("0.01"))
-        #except:
-            #flash("Preço inválido.", "danger")
-           # return redirect(url_for("admin_products_edit", product_id=product_id))
+            product = Product(
+                name=name,
+                description=description,
+                image=main_image,
+                is_active=is_active
+            )
 
-        image_url = (request.form.get("image_url") or "").strip()
-        is_active = True if request.form.get("is_active") == "on" else False
+            db.session.add(product)
+            db.session.flush()
 
-       # try:
-           # price_d = Decimal(price_raw).quantize(Decimal("0.01"))
-        #except Exception:
-           # flash("Preço inválido.", "danger")
-           # return redirect(url_for("admin_products_new"))
+            gallery_files = request.files.getlist("gallery_images")
+            for f in gallery_files:
+                filename = save_image(f)
+                if filename:
+                    db.session.add(ProductImage(product_id=product.id, image=filename))
 
-        if not name:
-            flash("Informe o nome.", "danger")
-            return redirect(url_for("admin_products_new"))
+            db.session.commit()
+            flash("Produto criado com sucesso.", "success")
+            return redirect(url_for("admin_products"))
 
-        p = Product(name=name, description=description, image_url=image_url, is_active=is_active)
-        db.session.add(p)
-        db.session.flush()
-
-        # Upload múltiplas fotos
-        files = request.files.getlist("image_files")
-        for f in files:
-            if not f or not getattr(f, "filename", ""):
-                continue
-            if not allowed_file(f.filename):
-                flash("Alguma foto foi ignorada (extensão não permitida). Use JPG/PNG/WEBP.", "warning")
-                continue
-            url = save_upload(f)
-            db.session.add(ProductImage(product_id=p.id, image_url=url))
-
-        db.session.commit()
-        flash("Produto criado ✅", "success")
-        return redirect(url_for("admin_products"))
-
-    @app.get("/admin/produtos/<int:product_id>/editar")
+        return render_template("admin_product_form.html", product=None)
+    
+    @app.route("/admin/produtos/<int:product_id>/editar", methods=["GET", "POST"])
     @login_required
-    def admin_products_edit(product_id):
+    def admin_product_edit(product_id):
         product = Product.query.get_or_404(product_id)
+
+        if request.method == "POST":
+            product.name = (request.form.get("name") or "").strip()
+            product.description = (request.form.get("description") or "").strip()
+            product.is_active = True if request.form.get("is_active") == "on" else False
+
+            main_file = request.files.get("image")
+            new_main = save_image(main_file)
+            if new_main:
+                product.image = new_main
+
+            gallery_files = request.files.getlist("gallery_images")
+            for f in gallery_files:
+                filename = save_image(f)
+                if filename:
+                    db.session.add(ProductImage(product_id=product.id, image=filename))
+
+            db.session.commit()
+            flash("Produto atualizado com sucesso.", "success")
+            return redirect(url_for("admin_product_edit", product_id=product.id))
+
         return render_template("admin_product_form.html", product=product)
 
     @app.route("/admin/encomendas")
@@ -632,25 +655,23 @@ def create_app():
         return redirect(url_for("admin_products_edit", product_id=product.id))
 
 
-    @app.post("/admin/produtos/imagem/<int:image_id>/excluir")
+    @app.route("/admin/produtos/imagem/<int:image_id>/excluir", methods=["POST"])
     @login_required
     def admin_product_image_delete(image_id):
-        img = ProductImage.query.get_or_404(image_id)
-        # remove file from disk if local static file
+        image = ProductImage.query.get_or_404(image_id)
+        product_id = image.product_id
+
         try:
-            if img.image_url.startswith("/static/"):
-                rel = img.image_url.lstrip("/")
-                fp = os.path.join(app.root_path, rel)
-                if os.path.exists(fp):
-                    os.remove(fp)
+            file_path = os.path.join(app.config["UPLOAD_FOLDER"], image.image)
+            if os.path.exists(file_path):
+                os.remove(file_path)
         except Exception:
             pass
 
-        product_id = img.product_id
-        db.session.delete(img)
+        db.session.delete(image)
         db.session.commit()
-        flash("Foto removida ✅", "success")
-        return redirect(url_for("admin_products_edit", product_id=product_id))
+        flash("Imagem removida.", "success")
+        return redirect(url_for("admin_product_edit", product_id=product_id))
 
     @app.post("/admin/produtos/<int:product_id>/excluir")
     @login_required

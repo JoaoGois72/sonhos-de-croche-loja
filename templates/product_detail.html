@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% block content %}
+
+<section class="product-page">
+  <div class="container product-page-grid">
+
+    <div class="product-gallery">
+      <div class="product-main-image">
+        {% if product.image %}
+          <img src="{{ url_for('static', filename='uploads/' + product.image) }}" alt="{{ product.name }}">
+        {% else %}
+          <img src="{{ url_for('static', filename='img/placeholder.jpg') }}" alt="{{ product.name }}">
+        {% endif %}
+      </div>
+
+      {% if product.images %}
+      <div class="product-thumb-grid">
+        {% for img in product.images %}
+        <img src="{{ url_for('static', filename='uploads/' + img.image) }}" alt="{{ product.name }}">
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="product-content">
+      <span class="eyebrow">Peça artesanal</span>
+      <h1>{{ product.name }}</h1>
+
+      <p class="product-detail-desc">
+        {{ product.description }}
+      </p>
+
+      <div class="product-detail-note">
+        Consulte valor no WhatsApp ou no Instagram
+      </div>
+
+      <div class="product-detail-actions">
+        <a href="https://wa.me/5579996897122?text=Olá, tenho interesse na peça {{ product.name }}"
+           target="_blank"
+           class="btn btn-dark">
+          Consultar no WhatsApp
+        </a>
+
+        <a href="https://instagram.com/sonhosdecroche_byevanice"
+           target="_blank"
+           class="btn btn-light">
+          Ver no Instagram
+        </a>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<section class="related-products">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow">Você também pode gostar</span>
+      <h2>Mais peças da coleção</h2>
+    </div>
+
+    <div class="products-v3-grid">
+      {% for p in related_products %}
+      <article class="product-v3-card">
+        <a href="{{ url_for('product_detail', product_id=p.id) }}" class="product-v3-image">
+          {% if p.image %}
+            <img src="{{ url_for('static', filename='uploads/' + p.image) }}" alt="{{ p.name }}">
+          {% else %}
+            <img src="{{ url_for('static', filename='img/placeholder.jpg') }}" alt="{{ p.name }}">
+          {% endif %}
+        </a>
+
+        <div class="product-v3-body">
+          <h3>{{ p.name }}</h3>
+          <p class="product-v3-desc">
+            {{ (p.description[:90] ~ '...') if p.description and p.description|length > 90 else p.description }}
+          </p>
+
+          <div class="product-v3-actions">
+            <a href="{{ url_for('product_detail', product_id=p.id) }}" class="btn btn-outline btn-small">
+              Ver peça
+            </a>
+          </div>
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+{% endblock %}

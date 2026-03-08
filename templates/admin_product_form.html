@@ -1,60 +1,57 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="card form-card">
-  <div class="card-pad">
-    <h2 style="margin:0">{{ "Editar produto" if product else "Novo produto" }}</h2>
-    <p class="muted" style="margin-top:6px">Upload múltiplo: JPG, PNG ou WEBP. Você pode remover fotos individualmente.</p>
 
-    {% if product %}
-      <form method="post" action="{{ url_for('admin_products_edit_post', product_id=product.id) }}" enctype="multipart/form-data" style="margin-top:14px">
-    {% else %}
-      <form method="post" action="{{ url_for('admin_products_new_post') }}" enctype="multipart/form-data" style="margin-top:14px">
-    {% endif %}
+<section class="admin-page">
+  <div class="admin-header">
+    <h2>{{ "Editar produto" if product else "Novo produto" }}</h2>
+    <p class="muted">Cadastre imagem principal, galeria e descrição do produto.</p>
+  </div>
 
-      <div class="form-row">
-        <div>
-          <label class="muted">Nome</label>
-          <input type="text" name="name" value="{{ product.name if product else '' }}" required>
-        </div>
-        <div>
-          <label class="muted">Preço</label>
-          <input type="text" name="price" value="{{ ('%.2f'|format(product.price)) if product else '' }}" placeholder="120,00" required>
-        </div>
+  <div class="admin-table-card">
+    <form method="post" enctype="multipart/form-data" class="admin-product-form">
+
+      <div class="admin-form-group">
+        <label>Nome do produto</label>
+        <input type="text" name="name" value="{{ product.name if product else '' }}" required>
       </div>
 
-      <div style="margin-top:12px">
-        <label class="muted">Descrição</label>
-        <textarea name="description" rows="4">{{ product.description if product else '' }}</textarea>
+      <div class="admin-form-group">
+        <label>Descrição</label>
+        <textarea name="description" rows="5">{{ product.description if product else '' }}</textarea>
       </div>
 
-      <div class="form-row" style="margin-top:12px">
-        <div>
-          <label class="muted">Imagem principal (URL opcional — legado)</label>
-          <input type="text" name="image_url" value="{{ product.image_url if product else '' }}" placeholder="/static/img/... ou https://...">
-        </div>
-        <div>
-          <label class="muted">Ativo</label>
-          <select name="is_active">
-            <option value="on" {% if (product and product.is_active) or (not product) %}selected{% endif %}>Sim</option>
-            <option value="" {% if product and not product.is_active %}selected{% endif %}>Não</option>
-          </select>
-        </div>
+      <div class="admin-form-group">
+        <label>Imagem principal</label>
+        <input type="file" name="image" accept=".jpg,.jpeg,.png,.webp">
       </div>
 
-      <div style="margin-top:12px">
-        <label class="muted">Adicionar fotos (múltiplas)</label>
-        <input type="file" name="image_files" multiple accept=".jpg,.jpeg,.png,.webp">
+      <div class="admin-form-group">
+        <label>Galeria de imagens</label>
+        <input type="file" name="gallery_images" multiple accept=".jpg,.jpeg,.png,.webp">
       </div>
 
-      {% if product and product.images and product.images|length > 0 %}
-      <div style="margin-top:14px">
-        <strong>Fotos atuais</strong>
-        <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-top:10px">
-          {% for im in product.images %}
-          <div class="card" style="padding:0;box-shadow:none;border:1px solid rgba(0,0,0,.08)">
-            <img src="{{ im.image_url }}" style="width:100%;height:120px;object-fit:cover;display:block" alt="Foto">
-            <form method="post" action="{{ url_for('admin_product_image_delete', image_id=im.id) }}">
-              <button class="btn danger block" style="border-radius:0">Remover</button>
+      <div class="admin-form-check">
+        <input type="checkbox" name="is_active" id="is_active"
+               {% if (product and product.is_active) or not product %}checked{% endif %}>
+        <label for="is_active">Produto ativo</label>
+      </div>
+
+      {% if product and product.image %}
+      <div class="admin-preview-block">
+        <strong>Imagem principal atual</strong>
+        <img src="{{ url_for('static', filename='uploads/' + product.image) }}" class="admin-preview-image">
+      </div>
+      {% endif %}
+
+      {% if product and product.images %}
+      <div class="admin-gallery-block">
+        <strong>Galeria atual</strong>
+        <div class="admin-gallery-grid">
+          {% for img in product.images %}
+          <div class="admin-gallery-card">
+            <img src="{{ url_for('static', filename='uploads/' + img.image) }}">
+            <form method="post" action="{{ url_for('admin_product_image_delete', image_id=img.id) }}">
+              <button class="btn-delete" type="submit">Excluir</button>
             </form>
           </div>
           {% endfor %}
@@ -62,12 +59,12 @@
       </div>
       {% endif %}
 
-      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px">
-        <button type="submit" class="btn primary">Salvar</button>
+      <button class="btn-admin-login" type="submit">
+        {{ "Salvar alterações" if product else "Criar produto" }}
+      </button>
 
-        <a class="btn soft" href="{{ url_for('admin_products') }}">Cancelar</a>
-      </div>
     </form>
   </div>
-</div>
+</section>
+
 {% endblock %}
