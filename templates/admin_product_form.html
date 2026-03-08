@@ -1,6 +1,5 @@
 {% extends "base.html" %}
 {% block content %}
-
 <section class="admin-page">
   <div class="admin-header">
     <h2>{{ "Editar produto" if product else "Novo produto" }}</h2>
@@ -9,7 +8,6 @@
 
   <div class="admin-table-card">
     <form method="post" enctype="multipart/form-data" class="admin-product-form">
-
       <div class="admin-form-group">
         <label>Nome do produto</label>
         <input type="text" name="name" value="{{ product.name if product else '' }}" required>
@@ -31,15 +29,14 @@
       </div>
 
       <div class="admin-form-check">
-        <input type="checkbox" name="is_active" id="is_active"
-               {% if (product and product.is_active) or not product %}checked{% endif %}>
+        <input type="checkbox" name="is_active" id="is_active" {% if (product and product.is_active) or not product %}checked{% endif %}>
         <label for="is_active">Produto ativo</label>
       </div>
 
       {% if product and product.image %}
       <div class="admin-preview-block">
         <strong>Imagem principal atual</strong>
-        <img src="{{ url_for('static', filename='uploads/' + product.image) }}" class="admin-preview-image">
+        <img src="{{ product.image if product.image.startswith('http') else url_for('static', filename='uploads/' + product.image) }}" class="admin-preview-image">
       </div>
       {% endif %}
 
@@ -49,22 +46,20 @@
         <div class="admin-gallery-grid">
           {% for img in product.images %}
           <div class="admin-gallery-card">
-            <img src="{{ url_for('static', filename='uploads/' + img.image) }}">
+            <img src="{{ img.image if img.image.startswith('http') else url_for('static', filename='uploads/' + img.image) }}">
+            {% if 'admin_product_image_delete' in current_app.view_functions %}
             <form method="post" action="{{ url_for('admin_product_image_delete', image_id=img.id) }}">
               <button class="btn-delete" type="submit">Excluir</button>
             </form>
+            {% endif %}
           </div>
           {% endfor %}
         </div>
       </div>
       {% endif %}
 
-      <button class="btn-admin-login" type="submit">
-        {{ "Salvar alterações" if product else "Criar produto" }}
-      </button>
-
+      <button class="btn-admin-login" type="submit">{{ "Salvar alterações" if product else "Criar produto" }}</button>
     </form>
   </div>
 </section>
-
 {% endblock %}

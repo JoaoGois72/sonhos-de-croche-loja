@@ -1,22 +1,25 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="card form-card">
-  <div class="card-pad">
-    <h2>Admin — Login</h2>
-    <p class="muted">Acesso restrito ao gerenciamento da loja.</p>
-    <form method="post" action="{{ url_for('admin_login_post') }}" style="margin-top:14px">
-      <div class="form-row">
-        <div>
-          <label class="muted">Email</label>
-          <input type="email" name="email" required>
-        </div>
-        <div>
-          <label class="muted">Senha</label>
-          <input type="password" name="password" required>
-        </div>
+<section class="admin-login">
+  <div class="admin-login-box">
+    <div class="admin-login-header">
+      <h2>Admin — Login</h2>
+      <p>Acesso restrito ao gerenciamento da loja.</p>
+    </div>
+
+    <form method="post" action="{{ url_for('admin_login_post') }}">
+      <div class="admin-form-group">
+        <label>Email</label>
+        <input type="email" name="email" placeholder="Digite seu email" required>
       </div>
-      <button class="btn primary block" style="margin-top:14px">Entrar</button>
+
+      <div class="admin-form-group">
+        <label>Senha</label>
+        <input type="password" name="password" placeholder="Digite sua senha" required>
+      </div>
+
+      <button class="btn-admin-login" type="submit">Entrar no painel</button>
     </form>
   </div>
-</div>
+</section>
 {% endblock %}
