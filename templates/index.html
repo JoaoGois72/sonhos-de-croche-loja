@@ -1,57 +1,116 @@
 {% extends "base.html" %}
-{% block hero %}
+{% block content %}
+
 <section class="hero-banner">
   <img src="{{ url_for('static', filename='img/banner.jpg') }}" alt="Sonhos de Crochê">
 </section>
+
 <section class="about-crochet">
-  <div class="about-box">
-    <span class="about-tag">Artesanato Exclusivo</span>
-    
-    <h2>Mais que bolsas, criamos arte em crochê</h2>
-    
-    <p>
-      Além das nossas bolsas artesanais premium, também produzimos 
-      <strong>amigurumis, roupas em crochê, biquínis e peças exclusivas sob encomenda</strong>. 
-      Cada criação é feita à mão com carinho, qualidade e acabamento impecável.
-    </p>
-  </div>
-</section>
- 
-  
-{% endblock %}
+  <div class="about-container">
+    <div class="about-text">
+      <span class="about-badge">Artesanato exclusivo</span>
+      <h2>Mais que bolsas, criamos arte em crochê</h2>
+      <p>
+        Além das nossas bolsas artesanais premium, também produzimos
+        <strong>amigurumis, roupas em crochê, biquínis e peças exclusivas sob encomenda</strong>.
+        Cada criação é feita à mão com carinho, qualidade e acabamento impecável.
+      </p>
+      <a href="/encomendas" class="btn-encomenda">Solicitar peça personalizada</a>
+    </div>
 
-{% block content %}
-<h2 id="catalogo" style="margin-top:18px;">Catálogo</h2>
-<p class="muted">Produtos disponíveis • Pronta entrega e encomenda.</p>
-
-<div class="grid products">
-  {% for p in products %}
-  <div class="card">
-    <a class="media" href="{{ url_for('product_detail', product_id=p.id) }}">
-      {% if p.images and p.images|length > 0 %}
-        <img src="{{ p.images[0].image_url }}" alt="{{ p.name }}">
-      {% else %}
-        <img src="{{ p.image_url or url_for('static', filename='img/placeholder.jpg') }}" alt="{{ p.name }}">
-      {% endif %}
-    </a>
-    <div class="card-pad">
-      <div class="h3">{{ p.name }}</div>
-      <div class="muted">{{ (p.description[:86] ~ '…') if p.description and p.description|length > 86 else (p.description or '') }}</div>
-
-      <div class="price">R$ {{ "%.2f"|format(p.price) }}</div>
-
-      {% if pix_discount_percent() > 0 %}
-        {% set pix_price = price_with_pix_discount(p.price) %}
-        {% set eco = (p.price - pix_price) %}
-        <div class="pix">
-          <div class="line1">💰 {{ pix_discount_percent() }}% OFF no Pix</div>
-          <div class="line2">Economia: R$ {{ "%.2f"|format(eco) }} • Pix: R$ {{ "%.2f"|format(pix_price) }}</div>
-        </div>
-      {% endif %}
-
-      <a class="btn primary block" style="margin-top:12px" href="{{ url_for('product_detail', product_id=p.id) }}">Ver produto</a>
+    <div class="about-icons">
+      <div class="icon-box">
+        <div class="icon">👜</div>
+        <span>Bolsas</span>
+      </div>
+      <div class="icon-box">
+        <div class="icon">🧸</div>
+        <span>Amigurumi</span>
+      </div>
+      <div class="icon-box">
+        <div class="icon">👗</div>
+        <span>Roupas</span>
+      </div>
+      <div class="icon-box">
+        <div class="icon">👙</div>
+        <span>Biquíni</span>
+      </div>
     </div>
   </div>
-  {% endfor %}
-</div>
+</section>
+
+<section class="home-featured">
+  <div class="section-head">
+    <span class="section-mini">Coleção em destaque</span>
+    <h2>Peças que encantam</h2>
+    <p>Seleção especial com acabamento artesanal e identidade exclusiva.</p>
+  </div>
+
+  <div class="products-grid">
+    {% for p in products[:8] %}
+    <div class="product-card">
+      <a href="{{ url_for('product_detail', product_id=p.id) }}" class="product-image">
+        {% if p.images and p.images|length > 0 %}
+          <img src="{{ p.images[0].image_url }}" alt="{{ p.name }}">
+        {% else %}
+          <img src="{{ p.image_url or url_for('static', filename='img/placeholder.jpg') }}" alt="{{ p.name }}">
+        {% endif %}
+      </a>
+
+      <div class="product-info">
+        <h3>{{ p.name }}</h3>
+        <p>{{ (p.description[:80] ~ '...') if p.description and p.description|length > 80 else p.description }}</p>
+        <div class="product-bottom">
+          <strong>R$ {{ '%.2f'|format(p.price) }}</strong>
+          <a href="{{ url_for('product_detail', product_id=p.id) }}" class="product-link">Ver mais</a>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="custom-highlight">
+  <div class="custom-highlight-box">
+    <span class="section-mini">Sob medida</span>
+    <h2>Tem uma ideia especial?</h2>
+    <p>
+      Criamos peças personalizadas em crochê para presentear, vestir ou eternizar momentos.
+      Fale com a gente e transforme sua ideia em algo único.
+    </p>
+    <a href="/encomendas" class="btn-encomenda">Solicitar orçamento</a>
+  </div>
+</section>
+
+<section class="testimonials">
+  <div class="section-head">
+    <span class="section-mini">Quem compra, ama</span>
+    <h2>Carinho em cada detalhe</h2>
+  </div>
+
+  <div class="testimonials-grid">
+    <div class="testimonial-card">
+      <p>“Acabamento impecável e uma delicadeza que impressiona. A bolsa ficou maravilhosa.”</p>
+      <strong>— Cliente satisfeita</strong>
+    </div>
+    <div class="testimonial-card">
+      <p>“Atendimento excelente e peça linda. Dá para ver o cuidado em cada ponto.”</p>
+      <strong>— Cliente encantada</strong>
+    </div>
+    <div class="testimonial-card">
+      <p>“Encomendei uma peça personalizada e ficou ainda mais bonita do que eu imaginava.”</p>
+      <strong>— Cliente feliz</strong>
+    </div>
+  </div>
+</section>
+
+<section class="home-final-cta">
+  <div class="home-final-box">
+    <h2>Feito à mão com amor, exclusivo para você</h2>
+    <p>Descubra a beleza do crochê artesanal em bolsas, roupas, amigurumis, biquínis e peças personalizadas.</p>
+    <a href="/encomendas" class="btn-encomenda">Falar sobre encomenda</a>
+  </div>
+</section>
+
 {% endblock %}
+

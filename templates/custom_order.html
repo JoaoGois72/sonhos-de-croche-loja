@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container">
+
+<h2>Encomenda personalizada</h2>
+
+<form method="POST">
+
+<label>Nome</label>
+<input type="text" name="name" required>
+
+<label>WhatsApp</label>
+<input type="text" name="whatsapp" required>
+
+<label>Tipo de peça</label>
+<select name="product_type">
+<option>Bolsa</option>
+<option>Amigurumi</option>
+<option>Roupa</option>
+<option>Biquíni</option>
+</select>
+
+<label>Descrição</label>
+<textarea name="description"></textarea>
+
+<button type="submit">Enviar encomenda</button>
+
+</form>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>Encomendas</h2>
+
+<table>
+
+<tr>
+<th>ID</th>
+<th>Cliente</th>
+<th>WhatsApp</th>
+<th>Tipo</th>
+<th>Status</th>
+<th>Ações</th>
+</tr>
+
+{% for o in orders %}
+
+<tr>
+
+<td>{{ o.id }}</td>
+
+<td>{{ o.name }}</td>
+
+<td>
+<a href="https://wa.me/{{ o.whatsapp }}" target="_blank">
+{{ o.whatsapp }}
+</a>
+</td>
+
+<td>{{ o.product_type }}</td>
+
+<td>{{ o.status }}</td>
+
+<td>
+
+<form action="/admin/encomenda/{{o.id}}/status" method="POST">
+
+<select name="status">
+
+<option>Nova</option>
+<option>Em produção</option>
+<option>Concluída</option>
+<option>Entregue</option>
+
+</select>
+
+<button>Atualizar</button>
+
+</form>
+
+<a href="/admin/encomenda/{{o.id}}/delete">
+Excluir
+</a>
+
+</td>
+
+</tr>
+
+{% endfor %}
+
+</table>
+
+{% endblock %}

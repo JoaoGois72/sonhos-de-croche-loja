@@ -1,22 +1,44 @@
 {% extends "base.html" %}
+
 {% block content %}
+
 <div class="card">
   <div class="card-pad" style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+
     <div>
       <h2 style="margin:0">Admin — Painel</h2>
-      <p class="muted" style="margin-top:6px">Pedidos recentes e status.</p>
+      <p class="muted" style="margin-top:6px">
+        Pedidos recentes e status da loja.
+      </p>
     </div>
+
     <div style="display:flex;gap:10px;flex-wrap:wrap">
-      <a class="btn primary" href="{{ url_for('admin_products') }}">Produtos</a>
-      <a class="btn soft" href="{{ url_for('admin_logout') }}">Sair</a>
+
+      <a class="btn primary" href="{{ url_for('admin_products') }}">
+        Produtos
+      </a>
+
+      <a class="btn primary" href="{{ url_for('admin_encomendas') }}">
+        Encomendas
+      </a>
+
+      <a class="btn soft" href="{{ url_for('admin_logout') }}">
+        Sair
+      </a>
+
     </div>
+
   </div>
 </div>
 
+
 <div class="card" style="margin-top:14px">
   <div class="card-pad">
+
     <strong>Pedidos</strong>
+
     <table class="table" style="margin-top:12px">
+
       <thead>
         <tr>
           <th>ID</th>
@@ -27,24 +49,56 @@
           <th>Data</th>
         </tr>
       </thead>
+
       <tbody>
+
         {% for o in orders %}
+
         <tr>
+
           <td>#{{ o.id }}</td>
+
           <td>{{ o.customer_name }}</td>
-          <td>R$ {{ "%.2f"|format(o.amount) }}</td>
-          <td>{{ "Pix" if o.payment_method=="pix" else "Cartão" }}</td>
-          <td style="min-width:220px">
-            <form method="post" action="{{ url_for('admin_order_status', order_id=o.id) }}">
-              <input type="text" name="status" value="{{ o.status }}">
-              <button class="btn primary block" style="margin-top:8px">Salvar</button>
-            </form>
+
+          <td>
+            R$ {{ "%.2f"|format(o.amount) }}
           </td>
-          <td>{{ o.created_at.strftime('%d/%m/%Y %H:%M') if o.created_at else "" }}</td>
+
+          <td>
+            {{ "Pix" if o.payment_method=="pix" else "Cartão" }}
+          </td>
+
+          <td style="min-width:220px">
+
+            <form method="post"
+                  action="{{ url_for('admin_order_status', order_id=o.id) }}">
+
+              <input type="text"
+                     name="status"
+                     value="{{ o.status }}">
+
+              <button class="btn primary block"
+                      style="margin-top:8px">
+                Salvar
+              </button>
+
+            </form>
+
+          </td>
+
+          <td>
+            {{ o.created_at.strftime('%d/%m/%Y %H:%M') if o.created_at else "" }}
+          </td>
+
         </tr>
+
         {% endfor %}
+
       </tbody>
+
     </table>
+
   </div>
 </div>
+
 {% endblock %}

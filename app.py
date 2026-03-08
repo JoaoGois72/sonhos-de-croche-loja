@@ -22,7 +22,15 @@ class User(db.Model, UserMixin):
     password_hash = db.Column(db.String(255), nullable=False)
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
+class CustomOrder(db.Model):
 
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(120), nullable=False)
+    whatsapp = db.Column(db.String(50), nullable=False)
+    product_type = db.Column(db.String(120))
+    description = db.Column(db.Text)
+    status = db.Column(db.String(50), default="Nova")
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
 class Product(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(120), nullable=False)
@@ -439,6 +447,32 @@ def create_app():
         orders = Order.query.order_by(Order.created_at.desc()).limit(80).all()
         return render_template("admin_dashboard.html", orders=orders)
 
+    @app.route("/encomendas", methods=["GET","POST"])
+    def encomendas():
+
+        if request.method == "POST":
+
+            name = request.form.get("name")
+            whatsapp = request.form.get("whatsapp")
+            product_type = request.form.get("product_type")
+            description = request.form.get("description")
+
+            order = CustomOrder(
+                name=name,
+                whatsapp=whatsapp,
+                product_type=product_type,
+                description=description
+            )
+
+            db.session.add(order)
+            db.session.commit()
+
+            flash("Encomenda enviada com sucesso!")
+
+            return redirect(url_for("index"))
+
+        return render_template("custom_order.html")
+    
     @app.get("/admin/produtos")
     @login_required
     def admin_products():
@@ -516,6 +550,42 @@ def create_app():
         product = Product.query.get_or_404(product_id)
         return render_template("admin_product_form.html", product=product)
 
+    @app.route("/admin/encomendas")
+    @login_required
+    def admin_encomendas():
+
+        orders = CustomOrder.query.order_by(CustomOrder.created_at.desc()).all()
+
+        return render_template("admin_encomendas.html", orders=orders)
+    
+    @app.route("/admin/encomenda/<int:id>/status", methods=["POST"])
+    @login_required
+    def admin_encomenda_status(id):
+
+        order = CustomOrder.query.get_or_404(id)
+
+        status = request.form.get("status")
+
+        order.status = status
+
+        db.session.commit()
+
+        return redirect(url_for("admin_encomendas"))
+
+    @app.route("/admin/encomenda/<int:id>/delete")
+    @login_required
+    def admin_encomenda_delete(id):
+
+        order = CustomOrder.query.get_or_404(id)
+
+        db.session.delete(order)
+
+        db.session.commit()
+
+        flash("Encomenda removida")
+
+        return redirect(url_for("admin_encomendas"))
+
     @app.post("/admin/produtos/<int:product_id>/editar")
     @login_required
     def admin_products_edit_post(product_id):
@@ -527,10 +597,10 @@ def create_app():
         product.is_active = True if request.form.get("is_active") == "on" else False
 
         # ===== CORREÇÃO DEFINITIVA DO PREÇO =====
-        price_raw = (request.form.get("price") or "").strip()
+        price_raw = (request.form.get("price") or "0")
 
         # Normaliza formatos brasileiros
-        price_raw = price_raw.replace(" ", "")
+        price_raw = price_raw.replace(",", ".")
 
         if "," in price_raw and "." in price_raw:
             # 1.200,50
@@ -616,3 +686,4 @@ def create_app():
 if __name__ == "__main__":
     app = create_app()
     app.run(host="0.0.0.0", port=int(os.getenv("PORT", "5000")), debug=True)
+    
