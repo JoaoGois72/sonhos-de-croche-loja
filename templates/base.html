@@ -1,353 +1,81 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
-  <meta name="theme-color" content="#0f172a">
-  <link rel="apple-touch-icon" href="{{ url_for('static', filename='img/icon-512.png') }}">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{{ STORE_NAME() }}</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/premium.css') }}">
-  
-  <style>
 
+  <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+  <meta name="theme-color" content="#0f172a">
+  <link rel="apple-touch-icon" href="{{ url_for('static', filename='img/icon-512.png') }}">
 
-/* ===== BOTÕES FLUTUANTES SOCIAIS ===== */
-/* ===== HERO FULL WIDTH ===== */
-.hero-banner{
-  width:100%;
-  margin:20px auto 30px;
-  border-radius:24px;
-  overflow:hidden;
-}
-.hero-banner img{
-  width:100%;
-  display:block;
-  height:auto;
-}
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-.about-crochet{
-  padding:70px 20px;
-  background:linear-gradient(to bottom,#ffffff,#f6f3ee);
-  display:flex;
-  justify-content:center;
-}
-.about-container{
-  max-width:1100px;
-  width:100%;
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:60px;
-  align-items:center;
-}
-.about-text h2{
-  font-size:34px;
-  margin-bottom:15px;
-}
-.about-text p{
-  font-size:17px;
-  line-height:1.7;
-  color:#555;
-  margin-bottom:25px;
-}
-.about-badge,
-.section-mini{
-  display:inline-block;
-  background:#c8a24e;
-  color:#fff;
-  font-size:13px;
-  padding:6px 14px;
-  border-radius:20px;
-  letter-spacing:1px;
-  margin-bottom:15px;
-}
-.btn-encomenda{
-  display:inline-block;
-  background:#111;
-  color:#fff;
-  padding:14px 28px;
-  border-radius:30px;
-  text-decoration:none;
-  font-weight:600;
-  transition:.3s;
-}
-.btn-encomenda:hover{
-  background:#c8a24e;
-}
-.about-icons{
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:30px;
-}
-.icon-box{
-  background:#fff;
-  padding:25px;
-  border-radius:16px;
-  text-align:center;
-  box-shadow:0 10px 30px rgba(0,0,0,.05);
-  transition:.3s;
-}
-.icon-box:hover{
-  transform:translateY(-5px);
-  box-shadow:0 20px 40px rgba(0,0,0,.08);
-}
-.icon{
-  font-size:28px;
-  margin-bottom:10px;
-}
-.icon-box span{
-  font-weight:600;
-}
-
-.section-head{
-  text-align:center;
-  max-width:760px;
-  margin:0 auto 35px;
-}
-.section-head h2{
-  font-size:34px;
-  margin:0 0 10px;
-}
-.section-head p{
-  color:#666;
-  font-size:16px;
-  line-height:1.6;
-}
-
-.home-featured{
-  padding:80px 20px;
-  background:#fff;
-}
-.products-grid{
-  max-width:1200px;
-  margin:0 auto;
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:24px;
-}
-.product-card{
-  background:#fff;
-  border-radius:18px;
-  overflow:hidden;
-  box-shadow:0 10px 25px rgba(0,0,0,.06);
-  transition:.3s;
-}
-.product-card:hover{
-  transform:translateY(-6px);
-  box-shadow:0 20px 35px rgba(0,0,0,.10);
-}
-.product-image{
-  display:block;
-  background:#f4f0ea;
-}
-.product-image img{
-  width:100%;
-  aspect-ratio:1/1;
-  object-fit:cover;
-  display:block;
-}
-.product-info{
-  padding:18px;
-}
-.product-info h3{
-  margin:0 0 8px;
-  font-size:18px;
-}
-.product-info p{
-  color:#666;
-  font-size:14px;
-  line-height:1.5;
-  min-height:42px;
-}
-.product-bottom{
-  margin-top:16px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:12px;
-}
-.product-link{
-  text-decoration:none;
-  color:#111;
-  font-weight:600;
-}
-
-.custom-highlight{
-  padding:80px 20px;
-  background:#f8f5ef;
-}
-.custom-highlight-box{
-  max-width:900px;
-  margin:0 auto;
-  text-align:center;
-  background:#fff;
-  padding:50px 30px;
-  border-radius:24px;
-  box-shadow:0 15px 35px rgba(0,0,0,.05);
-}
-.custom-highlight-box h2{
-  font-size:34px;
-  margin:0 0 15px;
-}
-.custom-highlight-box p{
-  color:#666;
-  line-height:1.7;
-  max-width:700px;
-  margin:0 auto 24px;
-}
-
-.testimonials{
-  padding:80px 20px;
-  background:#fff;
-}
-.testimonials-grid{
-  max-width:1100px;
-  margin:0 auto;
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:24px;
-}
-.testimonial-card{
-  background:#f8f5ef;
-  border-radius:18px;
-  padding:28px;
-  box-shadow:0 10px 25px rgba(0,0,0,.04);
-}
-.testimonial-card p{
-  color:#555;
-  line-height:1.7;
-  margin:0 0 18px;
-}
-.testimonial-card strong{
-  color:#222;
-}
-
-.home-final-cta{
-  padding:80px 20px 100px;
-  background:linear-gradient(to bottom,#fff,#f3eee6);
-}
-.home-final-box{
-  max-width:900px;
-  margin:0 auto;
-  text-align:center;
-}
-.home-final-box h2{
-  font-size:36px;
-  margin:0 0 15px;
-}
-.home-final-box p{
-  color:#666;
-  font-size:17px;
-  line-height:1.7;
-  margin:0 0 24px;
-}
-
-@media(max-width: 992px){
-  .about-container{
-    grid-template-columns:1fr;
-    gap:40px;
-    text-align:center;
-  }
-  .products-grid{
-    grid-template-columns:repeat(2,1fr);
-  }
-  .testimonials-grid{
-    grid-template-columns:1fr;
-  }
-}
-
-@media(max-width: 768px){
-  .about-text h2,
-  .section-head h2,
-  .custom-highlight-box h2,
-  .home-final-box h2{
-    font-size:26px;
-  }
-  .about-text p,
-  .custom-highlight-box p,
-  .home-final-box p{
-    font-size:15px;
-  }
-  .about-icons{
-    grid-template-columns:1fr 1fr;
-    gap:16px;
-  }
-  .products-grid{
-    grid-template-columns:1fr;
-  }
-  .hero-banner{
-    margin:12px auto 20px;
-    border-radius:16px;
-  }
-}
-</style>
-
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/premium.css') }}?v=shopify3">
 </head>
 <body>
 
-<header>
-  <div class="header-wrap">
-    <div class="brand">
-      <img src="{{ url_for('static', filename='img/logo.jpg') }}" alt="Logo {{ STORE_NAME() }}">
-      <div>
-        <div class="name">{{ STORE_NAME() }}</div>
-        <div class="tag">Loja oficial • Feito à mão</div>
-      </div>
+  <header class="site-header">
+    <div class="container header-wrap">
+      <a href="{{ url_for('index') }}" class="brand">
+        <img src="{{ url_for('static', filename='img/logo.jpg') }}" alt="Logo {{ STORE_NAME() }}">
+        <div class="brand-text">
+          <div class="name">{{ STORE_NAME() }}</div>
+          <div class="tag">Loja oficial • Feito à mão</div>
+        </div>
+      </a>
+
+      <nav class="nav">
+        <a href="{{ url_for('index') }}">Catálogo</a>
+        <a href="{{ url_for('cart_view') }}">Carrinho <span class="badge">{{ cart_count() }}</span></a>
+
+        {% if current_user.is_authenticated %}
+          <a href="{{ url_for('admin_dashboard') }}">Admin</a>
+          <a href="{{ url_for('admin_logout') }}">Sair</a>
+        {% else %}
+          <a href="{{ url_for('admin_login') }}">Admin</a>
+        {% endif %}
+      </nav>
     </div>
-    <nav class="nav">
-      <a href="{{ url_for('index') }}">Catálogo</a>
-      <a href="{{ url_for('cart_view') }}">🛍️ Carrinho <span class="badge">{{ cart_count() }}</span></a>
-      {% if current_user.is_authenticated %}
-        <a href="{{ url_for('admin_dashboard') }}">Admin</a>
-        <a href="{{ url_for('admin_logout') }}">Sair</a>
-      {% else %}
-        <a href="{{ url_for('admin_login') }}">Admin</a>
-      {% endif %}
-    </nav>
+  </header>
+
+  <main class="page">
+    <div class="container">
+      {% with msgs = get_flashed_messages(with_categories=true) %}
+        {% if msgs %}
+          {% for cat, msg in msgs %}
+            <div class="alert {{ cat }}">{{ msg }}</div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+    </div>
+
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-wrap">
+      <p>© {{ STORE_NAME() }} — Todos os direitos reservados</p>
+    </div>
+  </footer>
+
+  {% if not request.path.startswith('/admin') %}
+  <div class="floating-social">
+    <a href="https://instagram.com/sonhosdecroche_byevanice" target="_blank" class="float-btn instagram" title="Instagram">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="white" aria-hidden="true">
+        <path d="M7.8 2h8.4C19.7 2 22 4.3 22 7.8v8.4c0 3.5-2.3 5.8-5.8 5.8H7.8C4.3 22 2 19.7 2 16.2V7.8C2 4.3 4.3 2 7.8 2zm8.3 2H7.9C5.8 4 4 5.8 4 7.9v8.2c0 2.1 1.8 3.9 3.9 3.9h8.2c2.1 0 3.9-1.8 3.9-3.9V7.9c0-2.1-1.8-3.9-3.9-3.9zM12 7a5 5 0 110 10 5 5 0 010-10zm0 2a3 3 0 100 6 3 3 0 000-6zm4.8-2.3a1.1 1.1 0 110 2.2 1.1 1.1 0 010-2.2z"/>
+      </svg>
+    </a>
+
+    <a href="https://wa.me/5579996897122" target="_blank" class="float-btn whatsapp" title="WhatsApp">
+      <svg viewBox="0 0 32 32" width="22" height="22" fill="white" aria-hidden="true">
+        <path d="M16 .4C7.4.4.4 7.4.4 16c0 2.8.7 5.4 2 7.7L0 32l8.5-2.2c2.2 1.2 4.6 1.8 7.1 1.8 8.6 0 15.6-7 15.6-15.6S24.6.4 16 .4z"/>
+      </svg>
+    </a>
   </div>
-</header>
-
-<div class="container">
-  {% block hero %}{% endblock %}
-
-  {% with msgs = get_flashed_messages(with_categories=true) %}
-    {% if msgs %}
-      {% for cat,msg in msgs %}
-        <div class="alert {{ cat }}">{{ msg }}</div>
-      {% endfor %}
-    {% endif %}
-  {% endwith %}
-
-  {% block content %}{% endblock %}
-  <div class="footer">© {{ STORE_NAME() }} — Todos os direitos reservados</div>
-</div>
-
-<div class="floating-social">
-
-  <a href="https://wa.me/5579996897122"
-     target="_blank"
-     class="btn-whatsapp"
-     title="WhatsApp">
-
-    <svg viewBox="0 0 32 32" width="26" height="26" fill="white">
-      <path d="M16 .4C7.4.4.4 7.4.4 16c0 2.8.7 5.4 2 7.7L0 32l8.5-2.2c2.2 1.2 4.6 1.8 7.1 1.8 8.6 0 15.6-7 15.6-15.6S24.6.4 16 .4z"/>
-    </svg>
-
-  </a>
-
-  <a href="https://instagram.com/sonhosdecroche_byevanice"
-     target="_blank"
-     class="btn-instagram"
-     title="Instagram">
-
-    <svg viewBox="0 0 24 24" width="26" height="26" fill="white">
-      <path d="M7.8 2h8.4C19.7 2 22 4.3 22 7.8v8.4c0 3.5-2.3 5.8-5.8 5.8H7.8C4.3 22 2 19.7 2 16.2V7.8C2 4.3 4.3 2 7.8 2z"/>
-    </svg>
-
-  </a>
-
-</div>
-
+  {% endif %}
 
 </body>
 </html>
