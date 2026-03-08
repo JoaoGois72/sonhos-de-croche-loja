@@ -204,7 +204,7 @@ def create_app():
                 db.session.add(Product(
                     name=n,
                     description="Bolsa artesanal em crochê. Personalize cores e tamanho sob encomenda.",
-                    price=Decimal(""),
+                    price=Decimal("0.00"),
                     image_url="",
                     is_active=True,
                     created_at=datetime.utcnow(),
