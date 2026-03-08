@@ -490,42 +490,42 @@ def create_app():
         product = Product.query.get_or_404(product_id)
         name = (request.form.get("name") or "").strip()
         description = (request.form.get("description") or "").strip()
-        price_raw = (request.form.get("price") or "").strip()
+        #price_raw = (request.form.get("price") or "").strip()
 
         # aceita:
         # 120
         # 120.00
         # 120,00
         # 1.200,50
-        price_raw = price_raw.replace(" ", "")
+        #price_raw = price_raw.replace(" ", "")
 
-        if "," in price_raw and "." in price_raw:
+        #if "," in price_raw and "." in price_raw:
             # formato brasileiro 1.200,50
-            price_raw = price_raw.replace(".", "").replace(",", ".")
-        elif "," in price_raw:
+           # price_raw = price_raw.replace(".", "").replace(",", ".")
+       # elif "," in price_raw:
             # formato 120,00
-            price_raw = price_raw.replace(",", ".")
+           # price_raw = price_raw.replace(",", ".")
 
-        try:
-            product.price = Decimal(price_raw).quantize(Decimal("0.01"))
-        except:
-            flash("Preço inválido.", "danger")
-            return redirect(url_for("admin_products_edit", product_id=product_id))
+        #try:
+            #product.price = Decimal(price_raw).quantize(Decimal("0.01"))
+        #except:
+            #flash("Preço inválido.", "danger")
+           # return redirect(url_for("admin_products_edit", product_id=product_id))
 
         image_url = (request.form.get("image_url") or "").strip()
         is_active = True if request.form.get("is_active") == "on" else False
 
-        try:
-            price_d = Decimal(price_raw).quantize(Decimal("0.01"))
-        except Exception:
-            flash("Preço inválido.", "danger")
-            return redirect(url_for("admin_products_new"))
+       # try:
+           # price_d = Decimal(price_raw).quantize(Decimal("0.01"))
+        #except Exception:
+           # flash("Preço inválido.", "danger")
+           # return redirect(url_for("admin_products_new"))
 
         if not name:
             flash("Informe o nome.", "danger")
             return redirect(url_for("admin_products_new"))
 
-        p = Product(name=name, description=description, price=price_d, image_url=image_url, is_active=is_active)
+        p = Product(name=name, description=description, image_url=image_url, is_active=is_active)
         db.session.add(p)
         db.session.flush()
 
