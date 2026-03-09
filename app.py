@@ -89,14 +89,20 @@ import os
 def create_app():
 
     app = Flask(__name__)
+    
+    app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "chave-super-secreta")  # Substitua por uma chave secreta real em produção
 
     db_url = os.getenv("DATABASE_URL")
 
-    # Railway usa postgres://
-    if db_url and db_url.startswith("postgres://"):
-        db_url = db_url.replace("postgres://", "postgresql+psycopg://", 1)
+    # converter postgres do Railway para psycopg3
+    if db_url:
+        if db_url.startswith("postgres://"):
+            db_url = db_url.replace("postgres://", "postgresql+psycopg://", 1)
 
-    # fallback para rodar local
+        if db_url.startswith("postgresql://"):
+            db_url = db_url.replace("postgresql://", "postgresql+psycopg://", 1)
+
+    # fallback local
     if not db_url:
         db_url = "sqlite:///database.db"
 
