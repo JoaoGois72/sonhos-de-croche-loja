@@ -1,102 +1,116 @@
 {% extends "base.html" %}
 {% block content %}
 
-<section class="hero-v4">
-  <div class="container hero-v4-grid">
-    <div class="hero-v4-copy">
+<section class="hero-ultra">
+  <div class="container hero-ultra-grid">
+    <div class="hero-ultra-copy">
       <span class="eyebrow">Crochê artesanal premium</span>
-      <h1>Peças exclusivas que unem delicadeza, estilo e afeto</h1>
+      <h3>Peças exclusivas feitas à mão para encantar e durar</h3>
       <p>
         Bolsas, amigurumis, roupas, biquínis e peças personalizadas em crochê,
-        produzidas manualmente com acabamento refinado e identidade própria.
+        criadas com delicadeza, acabamento refinado e identidade própria.
       </p>
 
-      <div class="hero-v4-actions">
-        <a href="{{ url_for('custom_order') if 'custom_order' in current_app.view_functions else '/encomendas' }}" class="btn btn-dark">Solicitar encomenda</a>
+      <div class="hero-ultra-actions">
+        <a href="{{ url_for('encomendas') }}" class="btn btn-dark">Solicitar encomenda</a>
         <a href="https://wa.me/5579996897122" target="_blank" class="btn btn-light">Falar no WhatsApp</a>
       </div>
     </div>
 
-    <div class="hero-v4-media">
-      <img src="{{ url_for('static', filename='img/banner.jpg') }}" alt="Banner {{ STORE_NAME() }}">
+    <div class="hero-image">
+      <img src="/static/img/banner.jpg" alt="Peças de crochê artesanal">
     </div>
   </div>
 </section>
 
-<section class="signature-section">
-  <div class="container signature-box">
+<section class="brand-block">
+  <div class="container narrow center">
     <span class="eyebrow">Nossa essência</span>
     <h2>Sonhos de Crochê by Evanice</h2>
     <p>
-      Cada criação é feita à mão com atenção aos detalhes, valorizando beleza,
-      exclusividade e o cuidado artesanal que transforma cada peça em algo especial.
+      Cada criação nasce do cuidado artesanal com foco em beleza, exclusividade e afeto.
+      Mais do que produtos, entregamos peças que contam histórias.
     </p>
   </div>
 </section>
 
-<section class="categories-v4">
+<section class="categories-ultra">
   <div class="container">
     <div class="section-head">
       <span class="eyebrow">O que criamos</span>
       <h2>Uma marca completa em crochê</h2>
-      <p>Peças artesanais para vestir, presentear e encantar.</p>
+      <p>Peças artesanais para usar, presentear e se apaixonar.</p>
     </div>
 
-    <div class="categories-v4-grid">
-      <article class="cat-card">
+    <div class="categories-ultra-grid">
+      <article class="category-ultra-card">
         <div class="cat-icon">👜</div>
         <h3>Bolsas</h3>
-        <p>Modelos autorais, elegantes e cheios de personalidade.</p>
+        <p>Modelos sofisticados e autorais, feitos à mão.</p>
       </article>
-      <article class="cat-card">
+
+      <article class="category-ultra-card">
         <div class="cat-icon">🧸</div>
         <h3>Amigurumi</h3>
-        <p>Peças afetivas e delicadas, feitas com carinho.</p>
+        <p>Peças delicadas e afetivas, cheias de personalidade.</p>
       </article>
-      <article class="cat-card">
+
+      <article class="category-ultra-card">
         <div class="cat-icon">👗</div>
         <h3>Roupas</h3>
-        <p>Croppeds, saias, vestidos e criações sob medida.</p>
+        <p>Croppeds, vestidos, conjuntos e criações sob medida.</p>
       </article>
-      <article class="cat-card">
+
+      <article class="category-ultra-card">
         <div class="cat-icon">👙</div>
         <h3>Biquínis</h3>
-        <p>Moda praia artesanal com charme e exclusividade.</p>
+        <p>Moda praia artesanal com exclusividade e charme.</p>
       </article>
     </div>
   </div>
 </section>
 
-<section class="showcase-v4">
+<section class="products-ultra">
   <div class="container">
     <div class="section-head">
       <span class="eyebrow">Coleção em destaque</span>
       <h2>Peças que encantam</h2>
-      <p>Seleção especial com acabamento premium e visual autoral.</p>
+      <p>Seleção especial com visual refinado e acabamento premium.</p>
     </div>
 
-    <div class="products-grid-v4">
+    <div class="products-ultra-grid">
       {% for p in products[:8] %}
-      <article class="product-card-v4">
-        <a href="{{ url_for('product_detail', product_id=p.id) }}" class="product-image-v4">
-          {% if p.images and p.images|length > 0 %}
-            <img src="{{ p.images[0].image if p.images[0].image.startswith('http') else url_for('static', filename='uploads/' + p.images[0].image) }}" alt="{{ p.name }}">
-          {% elif p.image %}
-            <img src="{{ p.image if p.image.startswith('http') else url_for('static', filename='uploads/' + p.image) }}" alt="{{ p.name }}">
+      <article class="product-ultra-card">
+        <a href="{{ url_for('product_detail', product_id=p.id) }}" class="product-ultra-image">
+          {% if p.image %}
+            <img src="{{ p.image }}" alt="{{ p.name }}">
           {% else %}
             <img src="{{ url_for('static', filename='img/placeholder.jpg') }}" alt="{{ p.name }}">
           {% endif %}
         </a>
 
-        <div class="product-body-v4">
+        <div class="product-ultra-body">
           <h3>{{ p.name }}</h3>
-          <p class="product-desc-v4">
-            {{ (p.description[:90] ~ '...') if p.description and p.description|length > 90 else p.description }}
+
+          <p class="product-ultra-desc">
+            {{ (p.description[:100] ~ '...') if p.description and p.description|length > 100 else p.description }}
           </p>
-          <div class="product-note-v4">Consulte valor no WhatsApp ou no Instagram</div>
-          <div class="product-actions-v4">
-            <a href="https://wa.me/5579996897122?text=Olá, tenho interesse na peça {{ p.name }}" target="_blank" class="btn btn-dark btn-small">Consultar valor</a>
-            <a href="{{ url_for('product_detail', product_id=p.id) }}" class="btn btn-outline btn-small">Ver detalhes</a>
+
+          <div class="product-ultra-note">
+            Consulte valor no WhatsApp ou no Instagram
+          </div>
+
+          <div class="product-ultra-actions">
+            <a href="https://wa.me/5579996897122?text=Olá, tenho interesse na peça {{ p.name }}"
+               target="_blank"
+               class="btn btn-dark btn-small">
+              Consultar valor
+            </a>
+
+            <a href="{{ url_for('product_detail', product_id=p.id) }}"
+               class="btn btn-outline btn-small">
+              Ver peça
+            </a>
           </div>
         </div>
       </article>
@@ -105,7 +119,7 @@
   </div>
 </section>
 
-<section class="instagram-v4">
+<section class="instagram-ultra">
   <div class="container">
     <div class="section-head">
       <span class="eyebrow">Acompanhe nosso trabalho</span>
@@ -113,36 +127,33 @@
       <p>@sonhosdecroche_byevanice</p>
     </div>
 
-    <div class="instagram-grid-v4">
-      <a href="https://instagram.com/sonhosdecroche_byevanice" target="_blank"><img src="{{ url_for('static', filename='img/insta1.jpg') }}" alt="Instagram 1"></a>
-      <a href="https://instagram.com/sonhosdecroche_byevanice" target="_blank"><img src="{{ url_for('static', filename='img/insta2.jpg') }}" alt="Instagram 2"></a>
-      <a href="https://instagram.com/sonhosdecroche_byevanice" target="_blank"><img src="{{ url_for('static', filename='img/insta3.jpg') }}" alt="Instagram 3"></a>
-      <a href="https://instagram.com/sonhosdecroche_byevanice" target="_blank"><img src="{{ url_for('static', filename='img/insta4.jpg') }}" alt="Instagram 4"></a>
-    </div>
-
-    <div class="center mt-24">
-      <a href="https://instagram.com/sonhosdecroche_byevanice" target="_blank" class="btn btn-instagram">Ver mais no Instagram</a>
+        <div class="center mt-24">
+      <a href="https://instagram.com/sonhosdecroche_byevanice" target="_blank" class="btn btn-instagram">
+        Ver mais no Instagram
+      </a>
     </div>
   </div>
 </section>
 
-<section class="testimonials-v4">
+<section class="testimonials-ultra">
   <div class="container">
     <div class="section-head">
       <span class="eyebrow">Quem compra, ama</span>
       <h2>Carinho em cada detalhe</h2>
     </div>
 
-    <div class="testimonials-grid-v4">
-      <article class="testimonial-card-v4">
+    <div class="testimonials-ultra-grid">
+      <article class="testimonial-ultra-card">
         <p>“Acabamento impecável e uma delicadeza que impressiona. A peça ficou maravilhosa.”</p>
         <strong>— Cliente satisfeita</strong>
       </article>
-      <article class="testimonial-card-v4">
+
+      <article class="testimonial-ultra-card">
         <p>“Atendimento excelente e um trabalho lindo. Dá para perceber o cuidado em cada ponto.”</p>
         <strong>— Cliente encantada</strong>
       </article>
-      <article class="testimonial-card-v4">
+
+      <article class="testimonial-ultra-card">
         <p>“Encomendei uma peça personalizada e ficou ainda mais bonita do que eu imaginava.”</p>
         <strong>— Cliente feliz</strong>
       </article>
@@ -150,14 +161,18 @@
   </div>
 </section>
 
-<section class="cta-v4">
+<section class="cta-ultra">
   <div class="container">
-    <div class="cta-box-v4">
+    <div class="cta-ultra-box">
       <span class="eyebrow">Peça exclusiva</span>
       <h2>Transforme sua ideia em uma criação única</h2>
-      <p>Fazemos bolsas, amigurumis, roupas, biquínis e peças personalizadas em crochê. Fale com a gente e solicite sua encomenda.</p>
-      <div class="hero-v4-actions center">
-        <a href="{{ url_for('custom_order') if 'custom_order' in current_app.view_functions else '/encomendas' }}" class="btn btn-dark">Solicitar encomenda</a>
+      <p>
+        Fazemos bolsas, amigurumis, roupas, biquínis e peças personalizadas em crochê.
+        Fale com a gente e solicite sua encomenda.
+      </p>
+
+      <div class="hero-ultra-actions center">
+        <a href="{{ url_for('encomendas') }}" class="btn btn-dark">Solicitar encomenda</a>
         <a href="https://wa.me/5579996897122" target="_blank" class="btn btn-light">Falar no WhatsApp</a>
       </div>
     </div>
