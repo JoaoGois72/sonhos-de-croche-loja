@@ -3,10 +3,11 @@ from datetime import datetime
 from flask import Flask, render_template, request, redirect, url_for, flash, abort
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
+from werkzeug.security import generate_password_hash, check_password_hash
 
 import cloudinary
 import cloudinary.uploader
-import cloudinary.api
+
 
 
 db = SQLAlchemy()
@@ -16,9 +17,9 @@ login_manager.login_view = "admin_login"
 
 # CLOUDINARY
 cloudinary.config(
-    cloud_name=os.getenv("CLOUDINARY_CLOUD_NAME"),
-    api_key=os.getenv("CLOUDINARY_API_KEY"),
-    api_secret=os.getenv("CLOUDINARY_API_SECRET"),
+    cloud_name="diugrslyt",
+    api_key="229962315311773",
+    api_secret="rOF-znJdUlAF54Hft3OhQXMJcg8",
     secure=True
 )
 
@@ -69,7 +70,7 @@ class CustomOrder(db.Model):
 
     product_type = db.Column(db.String(120))
 
-    description = db.Column(db.Text)
+    details = db.Column(db.Text)
 
     status = db.Column(db.String(50), default="Nova")
 
@@ -169,6 +170,43 @@ def create_app():
 
         return render_template("encomendas.html")
 
+    @app.route("/encomendas/enviar", methods=["POST"])
+    def enviar_encomenda():
+
+        name = request.form.get("name")
+        whatsapp = request.form.get("whatsapp")
+        product_type = request.form.get("product_type")
+        details = request.form.get("details")
+
+        order = CustomOrder(
+            name=name,
+            whatsapp=whatsapp,
+            product_type=product_type,
+            details=details,
+            status="Nova"
+        )
+
+        db.session.add(order)
+        db.session.commit()
+
+        flash("Encomenda enviada com sucesso!", "success")
+
+        return redirect(url_for("index"))
+    
+    @app.route("/admin/encomenda/<int:id>/delete")
+    @login_required
+    def admin_encomenda_delete(id):
+
+        order = CustomOrder.query.get_or_404(id)
+
+        db.session.delete(order)
+
+        db.session.commit()
+
+        flash("Encomenda removida")
+
+        return redirect(url_for("admin_encomendas"))
+
 
     # LOGIN ADMIN
     @app.route("/admin")
@@ -184,9 +222,12 @@ def create_app():
 
         user = User.query.filter_by(email=email).first()
 
-        if not user or user.password != password:
+        if not user:
+            flash("Usuário não encontrado")
+            return redirect(url_for("admin_login"))
 
-            flash("Login inválido")
+        if not check_password_hash(user.password, password):
+            flash("Senha inválida")
             return redirect(url_for("admin_login"))
 
         login_user(user)
@@ -320,10 +361,14 @@ def create_app():
     def admin_encomenda_status(id):
 
         order = CustomOrder.query.get_or_404(id)
+        
+        status = request.form.get("status")
 
-        order.status = request.form.get("status")
+        order.status = status
 
         db.session.commit()
+        
+        flash("Status da encomenda atualizado!")
 
         return redirect(url_for("admin_encomendas"))
 

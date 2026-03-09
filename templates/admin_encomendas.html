@@ -1,49 +1,106 @@
 {% extends "base.html" %}
 {% block content %}
-<section class="admin-page">
-  <div class="admin-header">
-    <h2>📦 Encomendas</h2>
-    <p class="muted">Gerencie as solicitações de peças personalizadas.</p>
-  </div>
 
-  <div class="admin-table-card">
-    <table class="admin-table">
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Cliente</th>
-          <th>WhatsApp</th>
-          <th>Tipo</th>
-          <th>Status</th>
-          <th>Ações</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for o in orders %}
-        <tr>
-          <td>#{{ o.id }}</td>
-          <td>{{ o.name }}</td>
-          <td><a href="https://wa.me/{{ o.whatsapp }}" target="_blank" class="btn-whatsapp-small">WhatsApp</a></td>
-          <td>{{ o.product_type }}</td>
-          <td><span class="status-badge">{{ o.status }}</span></td>
-          <td>
-            <div class="admin-actions">
-              <form action="{{ url_for('admin_encomenda_status', id=o.id) }}" method="POST" class="admin-inline-form">
-                <select name="status" class="status-select">
-                  <option {% if o.status=='Nova' %}selected{% endif %}>Nova</option>
-                  <option {% if o.status=='Em produção' %}selected{% endif %}>Em produção</option>
-                  <option {% if o.status=='Concluída' %}selected{% endif %}>Concluída</option>
-                  <option {% if o.status=='Entregue' %}selected{% endif %}>Entregue</option>
-                </select>
-                <button class="btn-update">Atualizar</button>
-              </form>
-              <a href="{{ url_for('admin_encomenda_delete', id=o.id) }}" class="btn-delete">Excluir</a>
-            </div>
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+<section class="admin-shell">
+  <div class="container">
+
+    <div class="admin-topbar">
+      <div>
+        <span class="eyebrow">Pedidos personalizados</span>
+        <h1>Encomendas</h1>
+        <p class="admin-subtitle">Acompanhe o fluxo das peças sob encomenda.</p>
+      </div>
+
+      <div class="admin-top-actions">
+        <a href="{{ url_for('admin_dashboard') }}" class="btn btn-light">Dashboard</a>
+        <a href="{{ url_for('admin_products') }}" class="btn btn-dark">Produtos</a>
+      </div>
+    </div>
+
+    <section class="admin-panel">
+      <div class="admin-panel-head">
+        <h2>Lista de encomendas</h2>
+      </div>
+
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Cliente</th>
+              <th>Tipo</th>
+              <th>Detalhes</th>
+              <th>Status</th>
+              <th>Contato</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {% for o in orders %}
+            <tr>
+              <td>#{{ o.id }}</td>
+
+              <td>
+                <strong>{{ o.name }}</strong>
+                <p class="table-subtext">
+                  {{ o.created_at.strftime('%d/%m/%Y %H:%M') if o.created_at else '-' }}
+                </p>
+              </td>
+
+              <td>{{ o.product_type or '-' }}</td>
+
+              <td>
+                <div class="order-details-cell">
+                  {{ o.details or o.description or 'Sem detalhes informados.' }}
+                </div>
+              </td>
+
+              <td>
+                <span class="status-pill status-{{ o.status|lower|replace(' ','-') }}">
+                  {{ o.status }}
+                </span>
+              </td>
+
+              <td>
+                <a href="https://wa.me/{{ o.whatsapp }}" target="_blank" class="btn btn-whatsapp btn-small">
+                  WhatsApp
+                </a>
+              </td>
+
+              <td>
+                <div class="admin-order-actions">
+                  <form action="{{ url_for('admin_encomenda_status', id=o.id) }}" method="POST" class="admin-inline-form">
+                    <select name="status" class="admin-select">
+                      <option {% if o.status=="Nova" %}selected{% endif %}>Nova</option>
+                      <option {% if o.status=="Em produção" %}selected{% endif %}>Em produção</option>
+                      <option {% if o.status=="Concluída" %}selected{% endif %}>Concluída</option>
+                      <option {% if o.status=="Entregue" %}selected{% endif %}>Entregue</option>
+                    </select>
+                    <button class="btn btn-dark btn-small" type="submit">Salvar</button>
+                  </form>
+
+                  <a href="{{ url_for('admin_encomenda_delete', id=o.id) }}"
+                     class="btn btn-danger btn-small"
+                     onclick="return confirm('Deseja excluir esta encomenda?')">
+                    Excluir
+                  </a>
+                </div>
+              </td>
+            </tr>
+            {% else %}
+            <tr>
+              <td colspan="7">
+                <div class="empty-state">Nenhuma encomenda cadastrada.</div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+
   </div>
 </section>
+
 {% endblock %}

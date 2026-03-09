@@ -47,7 +47,7 @@
           {% for img in product.images %}
           <div class="admin-gallery-card">
             <img src="{{ img.image if img.image.startswith('http') else url_for('static', filename='uploads/' + img.image) }}">
-            {% if 'admin_product_image_delete' in current_app.view_functions %}
+            {% if 'admin_product_image_delete' in url_for('encomendas') %}
             <form method="post" action="{{ url_for('admin_product_image_delete', image_id=img.id) }}">
               <button class="btn-delete" type="submit">Excluir</button>
             </form>

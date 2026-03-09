@@ -13,7 +13,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/premium.css') }}?v=ultra1">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/premium.css') }}?v=ultra-final">
 </head>
 <body>
 
@@ -23,16 +23,14 @@
         <img src="{{ url_for('static', filename='img/logo.jpg') }}" alt="Logo {{ STORE_NAME() }}">
         <div class="brand-text">
           <div class="name">{{ STORE_NAME() }}</div>
-          <div class="tag">Loja oficial • Feito à mão</div>
+          <div class="tag">Crochê artesanal • Feito à mão</div>
         </div>
       </a>
 
-      <button class="menu-toggle" type="button" aria-label="Abrir menu" onclick="toggleMenu()">☰</button>
-
       <nav class="nav">
-        <a href="{{ url_for('index') }}">Catálogo</a>
-        <a href="{{ url_for('cart_view') }}">Carrinho <span class="badge">{{ cart_count() }}</span></a>
-        <a href="{{ url_for('custom_order') if 'custom_order' in current_app.view_functions else '/encomendas' }}">Encomendas</a>
+        <a href="{{ url_for('index') }}">Início</a>
+        <a href="{{ url_for('encomendas') }}">Encomendas</a>
+        <a href="https://instagram.com/sonhosdecroche_byevanice" target="_blank">Instagram</a>
 
         {% if current_user.is_authenticated %}
           <a href="{{ url_for('admin_dashboard') }}">Admin</a>
@@ -41,20 +39,6 @@
           <a href="{{ url_for('admin_login') }}">Admin</a>
         {% endif %}
       </nav>
-    </div>
-
-    <div class="mobile-menu" id="mobileMenu">
-      <a href="{{ url_for('index') }}">Catálogo</a>
-      <a href="{{ url_for('cart_view') }}">Carrinho</a>
-      <a href="{{ url_for('custom_order') if 'custom_order' in current_app.view_functions else '/encomendas' }}">Encomendas</a>
-      <a href="https://instagram.com/sonhosdecroche_byevanice" target="_blank">Instagram</a>
-      <a href="https://wa.me/5579996897122" target="_blank">WhatsApp</a>
-      {% if current_user.is_authenticated %}
-        <a href="{{ url_for('admin_dashboard') }}">Admin</a>
-        <a href="{{ url_for('admin_logout') }}">Sair</a>
-      {% else %}
-        <a href="{{ url_for('admin_login') }}">Admin</a>
-      {% endif %}
     </div>
   </header>
 
@@ -74,7 +58,16 @@
 
   <footer class="site-footer">
     <div class="container footer-wrap">
-      <p>© {{ STORE_NAME() }} — Todos os direitos reservados</p>
+      <div>
+        <strong>{{ STORE_NAME() }}</strong>
+        <p>Peças autorais em crochê, feitas com carinho e exclusividade.</p>
+      </div>
+
+      <div class="footer-links">
+        <a href="{{ url_for('encomendas') }}">Encomendas</a>
+        <a href="https://instagram.com/sonhosdecroche_byevanice" target="_blank">Instagram</a>
+        <a href="https://wa.me/5579996897122" target="_blank">WhatsApp</a>
+      </div>
     </div>
   </footer>
 
@@ -94,11 +87,5 @@
   </div>
   {% endif %}
 
-  <script>
-    function toggleMenu() {
-      const menu = document.getElementById('mobileMenu');
-      if (menu) menu.classList.toggle('show');
-    }
-  </script>
 </body>
 </html>

@@ -1,54 +1,77 @@
 {% extends "base.html" %}
-{% block content %}
-<section class="admin-page">
-  <div class="admin-header-row">
-    <div>
-      <h2>Produtos</h2>
-      <p class="muted">Gerencie o catálogo da loja.</p>
-    </div>
-    <div class="admin-links">
-      <a class="btn btn-dark btn-small" href="{{ url_for('admin_product_new') if 'admin_product_new' in current_app.view_functions else url_for('admin_products_new') }}">Novo produto</a>
-      <a class="btn btn-light btn-small" href="{{ url_for('admin_dashboard') }}">Voltar</a>
-    </div>
-  </div>
 
-  <div class="admin-table-card">
-    <table class="admin-table">
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Imagem</th>
-          <th>Nome</th>
-          <th>Status</th>
-          <th>Ações</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for p in products %}
-        <tr>
-          <td>#{{ p.id }}</td>
-          <td>
-            {% if p.image %}
-              <img class="table-thumb" src="{{ p.image if p.image.startswith('http') else url_for('static', filename='uploads/' + p.image) }}" alt="{{ p.name }}">
-            {% else %}
-              <img class="table-thumb" src="{{ url_for('static', filename='img/placeholder.jpg') }}" alt="{{ p.name }}">
-            {% endif %}
-          </td>
-          <td>{{ p.name }}</td>
-          <td>
-            {% if p.is_active %}
-              <span class="status-badge">Ativo</span>
-            {% else %}
-              <span class="status-badge">Inativo</span>
-            {% endif %}
-          </td>
-          <td class="admin-actions">
-            <a class="btn btn-outline btn-small" href="{{ url_for('admin_product_edit', product_id=p.id) if 'admin_product_edit' in current_app.view_functions else url_for('admin_products_edit', product_id=p.id) }}">Editar</a>
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
-</section>
+{% block content %}
+
+<div class="admin-header">
+
+<h1>Produtos</h1>
+
+<a href="{{ url_for('admin_product_new') }}" class="btn btn-primary">
+Novo Produto
+</a>
+
+</div>
+
+<div class="admin-table">
+
+<table>
+
+<thead>
+<tr>
+<th>ID</th>
+<th>Imagem</th>
+<th>Nome</th>
+<th>Status</th>
+<th>Ações</th>
+</tr>
+</thead>
+
+<tbody>
+
+{% for p in products %}
+
+<tr>
+
+<td>{{ p.id }}</td>
+
+<td>
+{% if p.image %}
+<img src="{{ p.image }}" style="height:50px">
+{% else %}
+-
+{% endif %}
+</td>
+
+<td>{{ p.name }}</td>
+
+<td>
+{% if p.is_active %}
+<span class="badge badge-success">Ativo</span>
+{% else %}
+<span class="badge badge-danger">Inativo</span>
+{% endif %}
+</td>
+
+<td>
+
+<a href="{{ url_for('admin_product_edit', product_id=p.id) }}" class="btn btn-small">
+Editar
+</a>
+
+<a href="{{ url_for('admin_product_delete', product_id=p.id) }}" class="btn btn-small btn-danger">
+Excluir
+</a>
+
+</td>
+
+</tr>
+
+{% endfor %}
+
+</tbody>
+
+</table>
+
+</div>
+
 {% endblock %}

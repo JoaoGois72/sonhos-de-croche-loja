@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block content %}
+
+<section class="order-page">
+
+<div class="container narrow">
+
+<div class="order-box">
+
+<span class="eyebrow">Encomenda personalizada</span>
+
+<h1>Solicite sua peça exclusiva</h1>
+
+<p>
+Fazemos peças personalizadas em crochê sob encomenda.
+Preencha as informações abaixo e entraremos em contato.
+</p>
+
+<form method="post" action="/encomendas/enviar" class="order-form">
+
+<label>Nome</label>
+<input type="text" name="name" required>
+
+<label>WhatsApp</label>
+<input type="text" name="whatsapp" required>
+
+<label>Tipo de peça</label>
+<select name="product_type">
+
+<option>Bolsa</option>
+<option>Amigurumi</option>
+<option>Roupa</option>
+<option>Biquíni</option>
+<option>Outro</option>
+
+</select>
+
+<label>Detalhes da encomenda</label>
+<textarea name="details" rows="4"></textarea>
+
+<button class="btn btn-dark">
+Enviar encomenda
+</button>
+
+</form>
+
+<div class="order-contact">
+
+<p>Ou fale diretamente pelo WhatsApp</p>
+
+<a href="https://wa.me/5579996897122"
+class="btn btn-instagram"
+target="_blank">
+
+Abrir WhatsApp
+
+</a>
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+{% endblock %}

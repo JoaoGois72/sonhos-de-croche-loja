@@ -1,60 +1,85 @@
 {% extends "base.html" %}
 {% block content %}
-<section class="product-page">
-  <div class="container product-page-grid">
-    <div class="product-gallery">
-      <div class="product-main-image">
+
+<section class="product-page-ultra">
+  <div class="container product-page-ultra-grid">
+
+    <div class="product-gallery-ultra">
+      <div class="product-main-ultra">
         {% if product.image %}
-          <img src="{{ product.image if product.image.startswith('http') else url_for('static', filename='uploads/' + product.image) }}" alt="{{ product.name }}">
+          <img src="{{ product.image }}" alt="{{ product.name }}">
         {% else %}
           <img src="{{ url_for('static', filename='img/placeholder.jpg') }}" alt="{{ product.name }}">
         {% endif %}
       </div>
 
       {% if product.images %}
-      <div class="product-thumb-grid">
+      <div class="product-thumbs-ultra">
         {% for img in product.images %}
-        <img src="{{ img.image if img.image.startswith('http') else url_for('static', filename='uploads/' + img.image) }}" alt="{{ product.name }}">
+        <img src="{{ img.image }}" alt="{{ product.name }}">
         {% endfor %}
       </div>
       {% endif %}
     </div>
 
-    <div class="product-content">
+    <div class="product-content-ultra">
       <span class="eyebrow">Peça artesanal</span>
       <h1>{{ product.name }}</h1>
-      <p class="product-detail-desc">{{ product.description }}</p>
-      <div class="product-detail-note">Consulte valor no WhatsApp ou no Instagram</div>
-      <div class="product-detail-actions">
-        <a href="https://wa.me/5579996897122?text=Olá, tenho interesse na peça {{ product.name }}" target="_blank" class="btn btn-dark">Consultar no WhatsApp</a>
-        <a href="https://instagram.com/sonhosdecroche_byevanice" target="_blank" class="btn btn-light">Ver no Instagram</a>
+
+      <p class="product-detail-desc-ultra">
+        {{ product.description }}
+      </p>
+
+      <div class="product-detail-note-ultra">
+        Consulte valor no WhatsApp ou no Instagram
+      </div>
+
+      <div class="product-detail-actions-ultra">
+        <a href="https://wa.me/5579996897122?text=Olá, tenho interesse na peça {{ product.name }}"
+           target="_blank"
+           class="btn btn-dark">
+          Consultar no WhatsApp
+        </a>
+
+        <a href="https://instagram.com/sonhosdecroche_byevanice"
+           target="_blank"
+           class="btn btn-light">
+          Ver no Instagram
+        </a>
       </div>
     </div>
+
   </div>
 </section>
 
-<section class="related-products">
+<section class="related-ultra">
   <div class="container">
     <div class="section-head">
       <span class="eyebrow">Você também pode gostar</span>
       <h2>Mais peças da coleção</h2>
     </div>
 
-    <div class="products-grid-v4">
+    <div class="products-ultra-grid">
       {% for p in related_products %}
-      <article class="product-card-v4">
-        <a href="{{ url_for('product_detail', product_id=p.id) }}" class="product-image-v4">
+      <article class="product-ultra-card">
+        <a href="{{ url_for('product_detail', product_id=p.id) }}" class="product-ultra-image">
           {% if p.image %}
-            <img src="{{ p.image if p.image.startswith('http') else url_for('static', filename='uploads/' + p.image) }}" alt="{{ p.name }}">
+            <img src="{{ p.image }}" alt="{{ p.name }}">
           {% else %}
             <img src="{{ url_for('static', filename='img/placeholder.jpg') }}" alt="{{ p.name }}">
           {% endif %}
         </a>
-        <div class="product-body-v4">
+
+        <div class="product-ultra-body">
           <h3>{{ p.name }}</h3>
-          <p class="product-desc-v4">{{ (p.description[:90] ~ '...') if p.description and p.description|length > 90 else p.description }}</p>
-          <div class="product-actions-v4">
-            <a href="{{ url_for('product_detail', product_id=p.id) }}" class="btn btn-outline btn-small">Ver peça</a>
+          <p class="product-ultra-desc">
+            {{ (p.description[:100] ~ '...') if p.description and p.description|length > 100 else p.description }}
+          </p>
+
+          <div class="product-ultra-actions">
+            <a href="{{ url_for('product_detail', product_id=p.id) }}" class="btn btn-outline btn-small">
+              Ver peça
+            </a>
           </div>
         </div>
       </article>
@@ -62,4 +87,5 @@
     </div>
   </div>
 </section>
+
 {% endblock %}

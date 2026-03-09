@@ -1,48 +1,101 @@
 {% extends "base.html" %}
 {% block content %}
-<section class="admin-page">
-  <div class="admin-header-row">
-    <div>
-      <h2>Admin — Painel</h2>
-      <p class="muted">Pedidos recentes e gestão da loja.</p>
-    </div>
-    <div class="admin-links">
-      <a class="btn btn-outline btn-small" href="{{ url_for('admin_products') }}">Produtos</a>
-      <a class="btn btn-outline btn-small" href="{{ url_for('admin_encomendas') }}">Encomendas</a>
-      <a class="btn btn-light btn-small" href="{{ url_for('admin_logout') }}">Sair</a>
-    </div>
-  </div>
 
-  <div class="admin-table-card">
-    <table class="admin-table">
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Cliente</th>
-          <th>Total</th>
-          <th>Pagamento</th>
-          <th>Status</th>
-          <th>Data</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for o in orders %}
-        <tr>
-          <td>#{{ o.id }}</td>
-          <td>{{ o.customer_name }}</td>
-          <td>{{ money_br(o.amount) if money_br is defined else o.amount }}</td>
-          <td>{{ 'Pix' if o.payment_method == 'pix' else 'Cartão' }}</td>
-          <td>
-            <form method="post" action="{{ url_for('admin_order_status', order_id=o.id) }}" class="admin-inline-form">
-              <input type="text" name="status" value="{{ o.status }}">
-              <button class="btn-update">Salvar</button>
-            </form>
-          </td>
-          <td>{{ o.created_at.strftime('%d/%m/%Y %H:%M') if o.created_at else '' }}</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+<section class="admin-shell">
+  <div class="container">
+
+    <div class="admin-topbar">
+      <div>
+        <span class="eyebrow">Painel administrativo</span>
+        <h1>Dashboard da loja</h1>
+        <p class="admin-subtitle">Acompanhe produtos, encomendas e atividade da loja.</p>
+      </div>
+
+      <div class="admin-top-actions">
+        <a href="{{ url_for('admin_product_new') }}" class="btn btn-dark">Novo produto</a>
+        <a href="{{ url_for('admin_encomendas') }}" class="btn btn-light">Ver encomendas</a>
+      </div>
+    </div>
+
+    <div class="admin-stats-grid">
+      <article class="admin-stat-card">
+        <span class="admin-stat-label">Produtos cadastrados</span>
+        <strong class="admin-stat-value">{{ products|length }}</strong>
+      </article>
+
+      <article class="admin-stat-card">
+        <span class="admin-stat-label">Encomendas totais</span>
+        <strong class="admin-stat-value">{{ orders|length }}</strong>
+      </article>
+
+      <article class="admin-stat-card">
+        <span class="admin-stat-label">Novas encomendas</span>
+        <strong class="admin-stat-value">
+          {{ orders | selectattr('status', 'equalto', 'Nova') | list | length }}
+        </strong>
+      </article>
+
+      <article class="admin-stat-card">
+        <span class="admin-stat-label">Em produção</span>
+        <strong class="admin-stat-value">
+          {{ orders | selectattr('status', 'equalto', 'Em produção') | list | length }}
+        </strong>
+      </article>
+    </div>
+
+    <div class="admin-grid-2">
+      <section class="admin-panel">
+        <div class="admin-panel-head">
+          <h2>Atalhos</h2>
+        </div>
+
+        <div class="admin-shortcuts">
+          <a href="{{ url_for('admin_products') }}" class="admin-shortcut-card">
+            <strong>Produtos</strong>
+            <span>Gerencie catálogo e imagens</span>
+          </a>
+
+          <a href="{{ url_for('admin_encomendas') }}" class="admin-shortcut-card">
+            <strong>Encomendas</strong>
+            <span>Veja pedidos personalizados</span>
+          </a>
+
+          <a href="{{ url_for('index') }}" class="admin-shortcut-card">
+            <strong>Ver loja</strong>
+            <span>Abrir vitrine pública</span>
+          </a>
+
+          <a href="{{ url_for('admin_logout') }}" class="admin-shortcut-card">
+            <strong>Sair</strong>
+            <span>Encerrar sessão do admin</span>
+          </a>
+        </div>
+      </section>
+
+      <section class="admin-panel">
+        <div class="admin-panel-head">
+          <h2>Encomendas recentes</h2>
+        </div>
+
+        <div class="admin-mini-list">
+          {% if orders %}
+            {% for o in orders[:6] %}
+            <div class="admin-mini-item">
+              <div>
+                <strong>#{{ o.id }} • {{ o.name }}</strong>
+                <p>{{ o.product_type or "Encomenda" }}</p>
+              </div>
+              <span class="status-pill status-{{ o.status|lower|replace(' ','-') }}">{{ o.status }}</span>
+            </div>
+            {% endfor %}
+          {% else %}
+            <p class="empty-state">Nenhuma encomenda cadastrada ainda.</p>
+          {% endif %}
+        </div>
+      </section>
+    </div>
+
   </div>
 </section>
+
 {% endblock %}
