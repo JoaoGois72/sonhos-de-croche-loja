@@ -93,7 +93,7 @@ def create_app():
     db_url = os.getenv("DATABASE_URL", "sqlite:///database.db")
 
     if db_url.startswith("postgres://"):
-        db_url = db_url.replace("postgres://", "postgresql+psycopg://", 1)
+        db_url = db_url.replace("postgres://", "postgresql+psycopg2://", 1)
 
     app.config["SQLALCHEMY_DATABASE_URI"] = db_url
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
