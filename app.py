@@ -70,7 +70,7 @@ class CustomOrder(db.Model):
 
     product_type = db.Column(db.String(120))
 
-    details = db.Column(db.Text)
+    description = db.Column(db.Text)
 
     status = db.Column(db.String(50), default="Nova")
 
@@ -189,13 +189,13 @@ def create_app():
         name = request.form.get("name")
         whatsapp = request.form.get("whatsapp")
         product_type = request.form.get("product_type")
-        details = request.form.get("details")
+        description = request.form.get("description")
 
         order = CustomOrder(
             name=name,
             whatsapp=whatsapp,
             product_type=product_type,
-            details=details,
+            description=description,
             status="Nova"
         )
 
