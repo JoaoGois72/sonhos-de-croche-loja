@@ -397,19 +397,23 @@ def create_app():
 
     with app.app_context():
 
-            db.drop_all()
-            db.create_all()
+        from sqlalchemy import text
 
-            # cria admin automaticamente se não existir
-            if not User.query.filter_by(email="admin@sonhosdecroche.com").first():
+        db.session.execute(text("DROP SCHEMA public CASCADE"))
+        db.session.execute(text("CREATE SCHEMA public"))
 
-                admin = User(
-                    email="admin@sonhosdecroche.com",
-                    password_hash=generate_password_hash("123456")
-                )
+        db.create_all()
 
-                db.session.add(admin)
-                db.session.commit()
+         # cria admin automaticamente se não existir
+        if not User.query.filter_by(email="admin@sonhosdecroche.com").first():
+
+            admin = User(
+                email="admin@sonhosdecroche.com",
+                password_hash=generate_password_hash("123456")
+            )
+
+            db.session.add(admin)
+            db.session.commit()
 
     return app
 
