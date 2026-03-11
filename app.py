@@ -394,15 +394,13 @@ def create_app():
             STORE_NAME=lambda: "Sonhos de Crochê"
         )
 
-    app = Flask(__name__)
-    login_manager.init_app(app)
-    
-    
+
+    # CRIAR BANCO E ADMIN AUTOMÁTICO
     with app.app_context():
 
         db.create_all()
 
-         # cria admin automaticamente se não existir
+        # cria admin automaticamente
         if not User.query.filter_by(email="admin@sonhosdecroche.com").first():
 
             admin = User(
@@ -413,8 +411,10 @@ def create_app():
             db.session.add(admin)
             db.session.commit()
 
+
     return app
 
 
+# APP GLOBAL PARA O GUNICORN (Railway)
 app = create_app()
     
