@@ -398,6 +398,7 @@ def create_app():
     with app.app_context():
 
             db.create_all()
+            db.create_all()
 
             # cria admin automaticamente se não existir
             if not User.query.filter_by(email="admin@sonhosdecroche.com").first():
