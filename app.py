@@ -28,7 +28,7 @@ cloudinary.config(
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(120), unique=True)
-    password = db.Column(db.String(120))
+    password_hash = db.Column(db.String(120))
 
 
 class Product(db.Model):
@@ -239,7 +239,7 @@ def create_app():
             flash("Usuário não encontrado")
             return redirect(url_for("admin_login"))
 
-        if not check_password_hash(user.password, password):
+        if not check_password_hash(user.password_hash, password):
             flash("Senha inválida")
             return redirect(url_for("admin_login"))
 
