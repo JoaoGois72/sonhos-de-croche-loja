@@ -395,7 +395,7 @@ def create_app():
         )
 
 
-        with app.app_context():
+    with app.app_context():
 
             db.create_all()
 
@@ -410,7 +410,7 @@ def create_app():
                 db.session.add(admin)
                 db.session.commit()
 
-        return app
+    return app
 
 
 app = create_app()
