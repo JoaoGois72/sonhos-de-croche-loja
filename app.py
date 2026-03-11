@@ -394,13 +394,11 @@ def create_app():
             STORE_NAME=lambda: "Sonhos de Crochê"
         )
 
-
+    app = Flask(__name__)
+    login_manager.init_app(app)
+    
+    
     with app.app_context():
-
-        from sqlalchemy import text
-
-        db.session.execute(text("DROP SCHEMA public CASCADE"))
-        db.session.execute(text("CREATE SCHEMA public"))
 
         db.create_all()
 
