@@ -398,14 +398,6 @@ def create_app():
     # CRIAR BANCO E ADMIN AUTOMÁTICO
     with app.app_context():
 
-        from sqlalchemy import text
-
-        try:
-            db.session.execute(text("DROP TABLE product_image CASCADE"))
-            db.session.commit()
-        except:
-            pass
-
         db.create_all()
 
         if not User.query.filter_by(email="admin@sonhosdecroche.com").first():
@@ -418,10 +410,8 @@ def create_app():
             db.session.add(admin)
             db.session.commit()
 
-
     return app
 
 
-# APP GLOBAL PARA O GUNICORN (Railway)
-app = create_app()
+    app = create_app()  
     
