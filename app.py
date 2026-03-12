@@ -17,9 +17,9 @@ login_manager.login_view = "admin_login"
 
 # CLOUDINARY
 cloudinary.config(
-    cloud_name="diugrslyt",
-    api_key="229962315311773",
-    api_secret="rOF-znJdUlAF54Hft3OhQXMJcg8",
+    cloud_name=os.getenv("CLOUDINARY_CLOUD_NAME"),
+    api_key=os.getenv("CLOUDINARY_API_KEY"),
+    api_secret=os.getenv("CLOUDINARY_API_SECRET"),
     secure=True
 )
 
