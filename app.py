@@ -410,7 +410,7 @@ def create_app():
             db.session.add(admin)
             db.session.commit()
 
-    return app
+        return app
 
 
     app = create_app()  
