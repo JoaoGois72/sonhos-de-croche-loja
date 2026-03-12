@@ -398,9 +398,16 @@ def create_app():
     # CRIAR BANCO E ADMIN AUTOMÁTICO
     with app.app_context():
 
+        from sqlalchemy import text
+
+        try:
+            db.session.execute(text("DROP TABLE product_image CASCADE"))
+            db.session.commit()
+        except:
+            pass
+
         db.create_all()
 
-        # cria admin automaticamente
         if not User.query.filter_by(email="admin@sonhosdecroche.com").first():
 
             admin = User(
